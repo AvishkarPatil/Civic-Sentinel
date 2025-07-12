@@ -20,7 +20,7 @@ class AdvancedCivicDetector:
         )
         self.scaler = StandardScaler()
         self.is_trained = False
-        self.anomaly_threshold = 0.4
+        self.anomaly_threshold = 0.2  # Lower threshold for better detection
         
         self.anomaly_types = {
             'pothole': 0,
@@ -263,6 +263,17 @@ class AdvancedCivicDetector:
         }
         anomaly_type = max(scores, key=scores.get) if is_anomaly else 'normal'
         
+        # Override if specific thresholds are met
+        if crack_score > 0.5:
+            anomaly_type = 'cracked_pavement'
+            is_anomaly = True
+        elif dumping_score > 0.15:
+            anomaly_type = 'debris'
+            is_anomaly = True
+        elif damage_score > 0.2:
+            anomaly_type = 'other'
+            is_anomaly = True
+        
         return {
             'image_path': image_path,
             'is_anomaly': is_anomaly,
@@ -311,10 +322,10 @@ class AdvancedCivicDetector:
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         
         # Multiple circle detection with different parameters
-        circles1 = cv2.HoughCircles(gray, cv2.HOUGH_GRADIENT, 1, 30,
-                                   param1=50, param2=25, minRadius=8, maxRadius=40)
-        circles2 = cv2.HoughCircles(gray, cv2.HOUGH_GRADIENT, 1, 50,
-                                   param1=40, param2=30, minRadius=10, maxRadius=60)
+        circles1 = cv2.HoughCircles(gray, cv2.HOUGH_GRADIENT, 1, 20,
+                                   param1=30, param2=15, minRadius=5, maxRadius=50)
+        circles2 = cv2.HoughCircles(gray, cv2.HOUGH_GRADIENT, 1, 30,
+                                   param1=25, param2=20, minRadius=8, maxRadius=60)
         
         pothole_score = 0
         for circles in [circles1, circles2]:
@@ -326,8 +337,23 @@ class AdvancedCivicDetector:
                               max(0, x-r):min(gray.shape[1], x+r)]
                     if roi.size > 0:
                         avg_intensity = np.mean(roi)
-                        if avg_intensity < 70:  # Dark area
-                            pothole_score += 0.2
+                        if avg_intensity < 100:  # Increased threshold for better detection
+                            pothole_score += 0.3
+        
+        # Also check for dark circular areas using contours
+        blurred = cv2.GaussianBlur(gray, (9, 9), 2)
+        _, thresh = cv2.threshold(blurred, 60, 255, cv2.THRESH_BINARY_INV)
+        contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        
+        for contour in contours:
+            area = cv2.contourArea(contour)
+            if 100 < area < 2000:  # Reasonable pothole size
+                # Check circularity
+                perimeter = cv2.arcLength(contour, True)
+                if perimeter > 0:
+                    circularity = 4 * np.pi * area / (perimeter * perimeter)
+                    if circularity > 0.3:  # Somewhat circular
+                        pothole_score += 0.2
         
         return min(pothole_score, 1.0)
     
