@@ -150,8 +150,8 @@ def analyze_image_features(image_array):
 
 def main():
     # Header
-    st.markdown('<h1 class="main-header">🛣️ Civic Sentinel</h1>', unsafe_allow_html=True)
-    st.markdown('<p style="text-align: center; font-size: 1.2rem; color: #666;">AI-Powered Road Anomaly Detection System</p>', unsafe_allow_html=True)
+    st.markdown('<h2 class="main-header">🛣️ Civic Sentinel</h2>', unsafe_allow_html=True)
+    st.markdown('<h4 style="text-align: center; font-size: 1.2rem; color: #666;">Your city\'s ever-watchful eye</h4>', unsafe_allow_html=True)
     
     # Load model
     detector = load_model()
@@ -180,7 +180,7 @@ def main():
 
 def home_page(detector):
     """Main detection page"""
-    st.header("🔍 Road Anomaly Detection")
+    st.markdown('<h3 style="text-align: center;">Road Anomaly Detection</h3>', unsafe_allow_html=True)
     
     # File uploader
     uploaded_file = st.file_uploader(
