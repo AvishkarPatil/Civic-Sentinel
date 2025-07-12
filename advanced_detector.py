@@ -304,16 +304,20 @@ class AdvancedCivicDetector:
         closed = cv2.morphologyEx(combined_edges, cv2.MORPH_CLOSE, kernel)
         
         # Detect lines
-        lines = cv2.HoughLinesP(closed, 1, np.pi/180, threshold=30, 
-                               minLineLength=20, maxLineGap=5)
+        lines = cv2.HoughLinesP(closed, 1, np.pi/180, threshold=50, 
+                               minLineLength=40, maxLineGap=15)
         
         if lines is not None:
             crack_score = 0
             for line in lines:
                 x1, y1, x2, y2 = line[0]
                 length = np.sqrt((x2-x1)**2 + (y2-y1)**2)
-                if length > 15:  # Significant crack
-                    crack_score += 0.1
+                angle = abs(np.arctan2(y2-y1, x2-x1) * 180 / np.pi)
+                
+                # Filter out lane markings (horizontal/vertical lines)
+                if not (80 < angle < 100 or angle < 10 or angle > 170):
+                    if length > 30:  # Only significant irregular cracks
+                        crack_score += 0.2
             return min(crack_score, 1.0)
         return 0.0
     
@@ -358,15 +362,13 @@ class AdvancedCivicDetector:
         return min(pothole_score, 1.0)
     
     def _detect_dumping_advanced(self, image):
-        """Advanced dumping detection"""
+        """Advanced dumping detection - exclude normal road infrastructure"""
         hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
         
-        # Multiple unusual color ranges
+        # Only very unusual colors (not normal signs/infrastructure)
         unusual_colors = [
-            ([0, 100, 100], [10, 255, 255]),    # Bright reds
-            ([110, 50, 50], [130, 255, 255]),   # Blues
-            ([20, 100, 100], [30, 255, 255]),   # Bright yellows
-            ([140, 50, 50], [160, 255, 255])    # Purples
+            ([0, 150, 150], [10, 255, 255]),    # Very bright reds only
+            ([20, 150, 150], [30, 255, 255]),   # Very bright yellows only
         ]
         
         unusual_pixels = 0
@@ -378,11 +380,8 @@ class AdvancedCivicDetector:
         
         color_score = unusual_pixels / total_pixels
         
-        # Texture analysis for irregular objects
-        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        texture_score = cv2.Laplacian(gray, cv2.CV_64F).var() / 1000
-        
-        return min(color_score * 3 + texture_score, 1.0)
+        # Only flag if very high unusual color percentage
+        return min(color_score * 5, 1.0) if color_score > 0.1 else 0.0
     
     def _detect_damage_advanced(self, image):
         """Advanced structural damage detection"""
