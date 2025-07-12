@@ -3,7 +3,7 @@ from advanced_detector import AdvancedCivicDetector
 detector = AdvancedCivicDetector()
 detector.load_model("civic_model.pkl")
 
-result = detector.detect_anomalies("images/normal_road2.jpg")
+result = detector.detect_anomalies("images/anomaly/cracked_image4.jpg")
 
 print("=== ML-Based Detection ===")
 print(f"Image: {result['image_path']}")
