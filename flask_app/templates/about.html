@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+
+{% block title %}About - Civic Sentinel{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-10 mx-auto">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-info-circle me-2"></i>About Civic Sentinel
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row align-items-center mb-5">
+                    <div class="col-md-4 text-center">
+                        <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Civic Sentinel Logo" class="img-fluid mb-3" style="max-width: 200px;">
+                    </div>
+                    <div class="col-md-8">
+                        <h2 class="text-primary">Civic Sentinel</h2>
+                        <h4 class="text-muted mb-3">AI-Powered Road Anomaly Detection</h4>
+                        <p class="lead">
+                            Civic Sentinel is an advanced computer vision system designed to automatically detect road anomalies, 
+                            specifically potholes, to help municipal authorities maintain better road infrastructure.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="row mb-5">
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">Key Features</h5>
+                            </div>
+                            <div class="card-body">
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item">
+                                        <i class="fas fa-robot text-primary me-2"></i>
+                                        <strong>AI-Powered Detection</strong> - Random Forest classifier with 95% training accuracy
+                                    </li>
+                                    <li class="list-group-item">
+                                        <i class="fas fa-chart-line text-primary me-2"></i>
+                                        <strong>Interactive Dashboard</strong> - Real-time analytics and visualization
+                                    </li>
+                                    <li class="list-group-item">
+                                        <i class="fas fa-history text-primary me-2"></i>
+                                        <strong>Detection History</strong> - Track and analyze detection patterns
+                                    </li>
+                                    <li class="list-group-item">
+                                        <i class="fas fa-file-download text-primary me-2"></i>
+                                        <strong>Export Functionality</strong> - Download detection reports
+                                    </li>
+                                    <li class="list-group-item">
+                                        <i class="fas fa-bullseye text-primary me-2"></i>
+                                        <strong>High Accuracy</strong> - 92% test accuracy on road anomaly detection
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">Technical Details</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-4">
+                                    <h6>Algorithm</h6>
+                                    <p>Random Forest Classifier with optimized hyperparameters</p>
+                                </div>
+                                <div class="mb-4">
+                                    <h6>Features</h6>
+                                    <p>17 image features including edges, texture, color, and contours</p>
+                                </div>
+                                <div class="mb-4">
+                                    <h6>Training Data</h6>
+                                    <p>Plain roads vs. Pothole classification dataset</p>
+                                </div>
+                                <div class="mb-4">
+                                    <h6>Performance</h6>
+                                    <p>95% training accuracy, 92% test accuracy</p>
+                                </div>
+                                <div>
+                                    <h6>Processing</h6>
+                                    <p>Real-time image analysis with confidence scores</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card mb-5" id="api">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">API Documentation</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>
+                            Civic Sentinel provides a REST API for programmatic access to the anomaly detection system.
+                            This allows integration with other applications and services.
+                        </p>
+                        
+                        <h6 class="mt-4">API Endpoints</h6>
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Endpoint</th>
+                                        <th>Method</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><code>/api/status</code></td>
+                                        <td>GET</td>
+                                        <td>Check API status and model availability</td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>/api/detect</code></td>
+                                        <td>POST</td>
+                                        <td>Detect anomalies in an uploaded image</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <h6 class="mt-4">Example Usage</h6>
+                        <pre class="bg-light p-3 rounded"><code>curl -X POST -F "file=@road.jpg" http://localhost:5000/api/detect</code></pre>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">System Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h6 class="card-title">Model Status</h6>
+                                        {% if model_loaded %}
+                                        <span class="badge bg-success">Loaded</span>
+                                        {% else %}
+                                        <span class="badge bg-danger">Not Loaded</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h6 class="card-title">Version</h6>
+                                        <span class="badge bg-primary">1.0.0</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h6 class="card-title">License</h6>
+                                        <span class="badge bg-secondary">MIT</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

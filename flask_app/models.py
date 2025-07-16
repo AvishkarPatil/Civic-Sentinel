@@ -1,4 +1,4 @@
-from . import db
+from . import db, login_manager
 from flask_login import UserMixin
 from datetime import datetime
 
@@ -13,6 +13,11 @@ class User(UserMixin, db.Model):
     
     def __repr__(self):
         return f'<User {self.email}>'
+
+@login_manager.user_loader
+def load_user(user_id):
+    """User loader function for Flask-Login"""
+    return User.query.get(int(user_id))
 
 class Detection(db.Model):
     """Detection history model"""
