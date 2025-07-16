@@ -71,6 +71,15 @@ Civic-Sentinel/
 │   └── test/
 │       ├── Plain/          # Test normal roads
 │       └── Pothole/        # Test potholes
+├── flask_app
+│   ├── static/
+│   │   └── all static files here (js, css, img)
+│   ├── templates/
+│   │   └── all html files here
+│   ├── api.py
+│   ├── auth.py
+│   ├── model.py
+│   └── route.py
 ├── anomaly_detector.py     # Core detection model
 ├── train.py               # Model training script
 ├── test.py                # Testing script
