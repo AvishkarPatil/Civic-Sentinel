@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block title %}Civic Sentinel - Road Anomaly Detection{% endblock %}
+
+{% block content %}
+<div class="row align-items-center">
+    <div class="col-lg-6">
+        <h1 class="display-4 fw-bold text-primary mb-4">Civic Sentinel</h1>
+        <h2 class="h3 text-secondary mb-4">AI-Powered Road Anomaly Detection</h2>
+        <p class="lead mb-4">
+            Civic Sentinel is an advanced computer vision system designed to automatically detect road anomalies, 
+            specifically potholes, to help municipal authorities maintain better road infrastructure.
+        </p>
+        <div class="d-grid gap-2 d-md-flex justify-content-md-start mb-4">
+            <a href="{{ url_for('main.detect') }}" class="btn btn-primary btn-lg px-4 me-md-2">
+                <i class="fas fa-search me-2"></i>Detect Anomalies
+            </a>
+            <a href="{{ url_for('main.about') }}" class="btn btn-outline-secondary btn-lg px-4">
+                <i class="fas fa-info-circle me-2"></i>Learn More
+            </a>
+        </div>
+        
+        {% if not model_loaded %}
+        <div class="alert alert-warning">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <strong>Warning:</strong> Model not loaded. Please train the model first.
+        </div>
+        {% endif %}
+    </div>
+    <div class="col-lg-6">
+        <div class="card shadow-lg border-0 rounded-lg overflow-hidden">
+            <img src="{{ url_for('static', filename='img/road-banner.jpg') }}" class="card-img-top" alt="Road Image">
+            <div class="card-body bg-light">
+                <h5 class="card-title">Key Features</h5>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item bg-light">
+                        <i class="fas fa-robot text-primary me-2"></i>
+                        <strong>AI-Powered Detection</strong> - Random Forest classifier with 95% training accuracy
+                    </li>
+                    <li class="list-group-item bg-light">
+                        <i class="fas fa-chart-line text-primary me-2"></i>
+                        <strong>Interactive Dashboard</strong> - Real-time analytics and visualization
+                    </li>
+                    <li class="list-group-item bg-light">
+                        <i class="fas fa-history text-primary me-2"></i>
+                        <strong>Detection History</strong> - Track and analyze detection patterns
+                    </li>
+                    <li class="list-group-item bg-light">
+                        <i class="fas fa-file-download text-primary me-2"></i>
+                        <strong>Export Functionality</strong> - Download detection reports
+                    </li>
+                    <li class="list-group-item bg-light">
+                        <i class="fas fa-bullseye text-primary me-2"></i>
+                        <strong>High Accuracy</strong> - 92% test accuracy on road anomaly detection
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<hr class="my-5">
+
+<div class="row g-4 py-4">
+    <div class="col-md-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex justify-content-center mb-3">
+                    <div class="icon-circle bg-primary text-white">
+                        <i class="fas fa-upload"></i>
+                    </div>
+                </div>
+                <h5 class="card-title text-center">Upload Image</h5>
+                <p class="card-text text-center">
+                    Upload road images to analyze for anomalies like potholes and cracks.
+                </p>
+            </div>
+            <div class="card-footer bg-transparent border-0 text-center">
+                <a href="{{ url_for('main.detect') }}" class="btn btn-sm btn-outline-primary">Get Started</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex justify-content-center mb-3">
+                    <div class="icon-circle bg-success text-white">
+                        <i class="fas fa-chart-pie"></i>
+                    </div>
+                </div>
+                <h5 class="card-title text-center">View Analytics</h5>
+                <p class="card-text text-center">
+                    Access detailed analytics and insights from your detection history.
+                </p>
+            </div>
+            <div class="card-footer bg-transparent border-0 text-center">
+                <a href="{{ url_for('main.analytics') }}" class="btn btn-sm btn-outline-success">View Analytics</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex justify-content-center mb-3">
+                    <div class="icon-circle bg-info text-white">
+                        <i class="fas fa-code"></i>
+                    </div>
+                </div>
+                <h5 class="card-title text-center">API Access</h5>
+                <p class="card-text text-center">
+                    Integrate with our API for programmatic access to anomaly detection.
+                </p>
+            </div>
+            <div class="card-footer bg-transparent border-0 text-center">
+                <a href="{{ url_for('main.about') }}#api" class="btn btn-sm btn-outline-info">Learn More</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .icon-circle {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+    }
+</style>
+{% endblock %}
