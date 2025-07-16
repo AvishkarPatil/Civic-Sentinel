@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+
+{% block title %}Detect Road Anomalies - Civic Sentinel{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-search me-2"></i>Road Anomaly Detection
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text">
+                    Upload a road image to detect anomalies such as potholes. The AI model will analyze the image and provide a prediction with confidence score.
+                </p>
+                
+                <form action="{{ url_for('main.detect') }}" method="post" enctype="multipart/form-data" id="uploadForm">
+                    <div class="mb-4">
+                        <div class="upload-area p-5 text-center border border-2 border-dashed rounded-3">
+                            <div id="uploadIcon">
+                                <i class="fas fa-cloud-upload-alt fa-4x text-muted mb-3"></i>
+                                <h5>Drag & Drop Image Here</h5>
+                                <p class="text-muted">or</p>
+                            </div>
+                            <div id="previewContainer" class="d-none">
+                                <img id="imagePreview" class="img-fluid mb-3 rounded" alt="Preview">
+                                <div class="d-flex justify-content-center">
+                                    <button type="button" id="removeImage" class="btn btn-sm btn-outline-danger">
+                                        <i class="fas fa-times me-1"></i>Remove
+                                    </button>
+                                </div>
+                            </div>
+                            <input type="file" name="file" id="fileInput" class="d-none" accept=".jpg,.jpeg,.png,.bmp">
+                            <button type="button" id="browseButton" class="btn btn-primary">
+                                <i class="fas fa-folder-open me-2"></i>Browse Files
+                            </button>
+                        </div>
+                        <div class="small text-muted mt-2">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Supported formats: JPG, PNG, BMP | Max size: 16MB
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" id="analyzeButton" class="btn btn-success btn-lg" disabled>
+                            <i class="fas fa-search me-2"></i>Analyze Image
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="card shadow-sm mt-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-info-circle me-2"></i>How It Works
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 text-center mb-3 mb-md-0">
+                        <div class="step-circle mx-auto mb-3">1</div>
+                        <h5>Upload Image</h5>
+                        <p class="text-muted">Upload a road image using the form above</p>
+                    </div>
+                    <div class="col-md-4 text-center mb-3 mb-md-0">
+                        <div class="step-circle mx-auto mb-3">2</div>
+                        <h5>AI Analysis</h5>
+                        <p class="text-muted">Our AI model analyzes the image for anomalies</p>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <div class="step-circle mx-auto mb-3">3</div>
+                        <h5>View Results</h5>
+                        <p class="text-muted">Get detailed analysis with confidence scores</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .upload-area {
+        transition: all 0.3s ease;
+        background-color: #f8f9fa;
+    }
+    
+    .upload-area:hover {
+        background-color: #e9ecef;
+    }
+    
+    .upload-area.dragover {
+        background-color: #e3f2fd;
+        border-color: #0d6efd !important;
+    }
+    
+    .step-circle {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background-color: #0d6efd;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        font-weight: bold;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        const uploadArea = $('.upload-area');
+        const fileInput = $('#fileInput');
+        const browseButton = $('#browseButton');
+        const uploadIcon = $('#uploadIcon');
+        const previewContainer = $('#previewContainer');
+        const imagePreview = $('#imagePreview');
+        const removeImage = $('#removeImage');
+        const analyzeButton = $('#analyzeButton');
+        
+        // Browse button click
+        browseButton.click(function() {
+            fileInput.click();
+        });
+        
+        // File input change
+        fileInput.change(function() {
+            handleFiles(this.files);
+        });
+        
+        // Drag and drop
+        uploadArea.on('dragover', function(e) {
+            e.preventDefault();
+            uploadArea.addClass('dragover');
+        });
+        
+        uploadArea.on('dragleave', function(e) {
+            e.preventDefault();
+            uploadArea.removeClass('dragover');
+        });
+        
+        uploadArea.on('drop', function(e) {
+            e.preventDefault();
+            uploadArea.removeClass('dragover');
+            
+            if (e.originalEvent.dataTransfer.files.length) {
+                handleFiles(e.originalEvent.dataTransfer.files);
+            }
+        });
+        
+        // Remove image
+        removeImage.click(function() {
+            fileInput.val('');
+            uploadIcon.removeClass('d-none');
+            previewContainer.addClass('d-none');
+            analyzeButton.prop('disabled', true);
+        });
+        
+        // Handle files
+        function handleFiles(files) {
+            if (files.length === 0) return;
+            
+            const file = files[0];
+            
+            // Check if file is an image
+            if (!file.type.match('image.*')) {
+                alert('Please select an image file (JPG, PNG, BMP).');
+                return;
+            }
+            
+            // Check file size (max 16MB)
+            if (file.size > 16 * 1024 * 1024) {
+                alert('File size exceeds 16MB limit.');
+                return;
+            }
+            
+            // Display preview
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                imagePreview.attr('src', e.target.result);
+                uploadIcon.addClass('d-none');
+                previewContainer.removeClass('d-none');
+                analyzeButton.prop('disabled', false);
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+</script>
+{% endblock %}
