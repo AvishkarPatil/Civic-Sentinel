@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+
+{% block title %}Detection Results - Civic Sentinel{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-10 mx-auto">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-search me-2"></i>Detection Results
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0">Uploaded Image</h6>
+                            </div>
+                            <div class="card-body text-center">
+                                <img src="{{ image_path }}" class="img-fluid rounded" alt="{{ filename }}">
+                                <p class="mt-2 text-muted">{{ filename }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0">AI Prediction</h6>
+                            </div>
+                            <div class="card-body">
+                                {% if result.is_anomaly %}
+                                <div class="alert alert-danger text-center mb-4">
+                                    <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
+                                    <h4 class="alert-heading">Pothole Detected</h4>
+                                    <p class="mb-0">This image contains a road anomaly.</p>
+                                </div>
+                                {% else %}
+                                <div class="alert alert-success text-center mb-4">
+                                    <i class="fas fa-check-circle fa-2x mb-2"></i>
+                                    <h4 class="alert-heading">Normal Road</h4>
+                                    <p class="mb-0">No anomalies detected in this image.</p>
+                                </div>
+                                {% endif %}
+                                
+                                <div class="row text-center">
+                                    <div class="col-6">
+                                        <div class="card bg-light">
+                                            <div class="card-body py-3">
+                                                <h6 class="card-title mb-1">Confidence</h6>
+                                                <h3 class="mb-0">{{ "%.1f"|format(result.confidence * 100) }}%</h3>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="card bg-light">
+                                            <div class="card-body py-3">
+                                                <h6 class="card-title mb-1">Classification</h6>
+                                                <h3 class="mb-0">{{ result.anomaly_type|title }}</h3>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0">Confidence Analysis</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div id="confidenceChart" style="height: 300px;"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <table class="table table-bordered">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Classification</th>
+                                            <th>Probability</th>
+                                            <th>Percentage</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Normal Road</td>
+                                            <td>{{ result.probabilities.plain }}</td>
+                                            <td>{{ "%.1f"|format(result.probabilities.plain * 100) }}%</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Pothole</td>
+                                            <td>{{ result.probabilities.pothole }}</td>
+                                            <td>{{ "%.1f"|format(result.probabilities.pothole * 100) }}%</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-flex justify-content-between">
+                    <a href="{{ url_for('main.detect') }}" class="btn btn-primary">
+                        <i class="fas fa-arrow-left me-2"></i>Analyze Another Image
+                    </a>
+                    <a href="{{ url_for('main.history') }}" class="btn btn-secondary">
+                        <i class="fas fa-history me-2"></i>View Detection History
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    $(document).ready(function() {
+        // Confidence chart
+        const ctx = document.getElementById('confidenceChart').getContext('2d');
+        const confidenceChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Normal Road', 'Pothole'],
+                datasets: [{
+                    label: 'Confidence',
+                    data: [
+                        {{ result.probabilities.plain }},
+                        {{ result.probabilities.pothole }}
+                    ],
+                    backgroundColor: [
+                        'rgba(40, 167, 69, 0.7)',
+                        'rgba(220, 53, 69, 0.7)'
+                    ],
+                    borderColor: [
+                        'rgba(40, 167, 69, 1)',
+                        'rgba(220, 53, 69, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 1,
+                        ticks: {
+                            callback: function(value) {
+                                return (value * 100) + '%';
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return (context.raw * 100).toFixed(1) + '%';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

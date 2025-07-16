@@ -1,0 +1,228 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics Dashboard - Civic Sentinel{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-bar me-2"></i>Analytics Dashboard
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if not history %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    No detection history available. Analyze some images first!
+                </div>
+                {% else %}
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="card bg-primary text-white">
+                            <div class="card-body text-center">
+                                <h1 class="display-4">{{ history|length }}</h1>
+                                <p class="mb-0">Total Images</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-success text-white">
+                            <div class="card-body text-center">
+                                <h1 class="display-4">{{ history|selectattr('prediction', 'equalto', 'normal')|list|length }}</h1>
+                                <p class="mb-0">Normal Roads</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-danger text-white">
+                            <div class="card-body text-center">
+                                <h1 class="display-4">{{ history|selectattr('prediction', 'equalto', 'pothole')|list|length }}</h1>
+                                <p class="mb-0">Potholes</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-info text-white">
+                            <div class="card-body text-center">
+                                {% set total_confidence = 0 %}
+                                {% for item in history %}
+                                    {% set total_confidence = total_confidence + item.confidence %}
+                                {% endfor %}
+                                <h1 class="display-4">{{ "%.1f"|format((total_confidence / history|length) * 100) }}%</h1>
+                                <p class="mb-0">Avg Confidence</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card shadow-sm mb-4">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0">Detection Summary</h6>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="detectionPieChart" height="300"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card shadow-sm mb-4">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0">Confidence Over Time</h6>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="confidenceLineChart" height="300"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card shadow-sm">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0">Recent Detections</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Timestamp</th>
+                                        <th>Image</th>
+                                        <th>Prediction</th>
+                                        <th>Confidence</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in history[:10] %}
+                                    <tr>
+                                        <td>{{ item.timestamp }}</td>
+                                        <td>{{ item.image_name }}</td>
+                                        <td>{{ item.prediction|title }}</td>
+                                        <td>{{ "%.1f"|format(item.confidence * 100) }}%</td>
+                                        <td>
+                                            {% if item.is_anomaly %}
+                                            <span class="badge bg-danger">Anomaly</span>
+                                            {% else %}
+                                            <span class="badge bg-success">Normal</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="text-center mt-3">
+                            <a href="{{ url_for('main.history') }}" class="btn btn-outline-primary">
+                                <i class="fas fa-history me-2"></i>View Full History
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% if history %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    $(document).ready(function() {
+        // Detection pie chart
+        const pieCtx = document.getElementById('detectionPieChart').getContext('2d');
+        const detectionPieChart = new Chart(pieCtx, {
+            type: 'pie',
+            data: {
+                labels: ['Normal Roads', 'Potholes'],
+                datasets: [{
+                    data: [
+                        {{ history|selectattr('prediction', 'equalto', 'normal')|list|length }},
+                        {{ history|selectattr('prediction', 'equalto', 'pothole')|list|length }}
+                    ],
+                    backgroundColor: [
+                        'rgba(40, 167, 69, 0.7)',
+                        'rgba(220, 53, 69, 0.7)'
+                    ],
+                    borderColor: [
+                        'rgba(40, 167, 69, 1)',
+                        'rgba(220, 53, 69, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+        
+        // Confidence line chart
+        const lineCtx = document.getElementById('confidenceLineChart').getContext('2d');
+        const confidenceLineChart = new Chart(lineCtx, {
+            type: 'line',
+            data: {
+                labels: [
+                    {% for item in history[-10:]|reverse %}
+                        '{{ item.timestamp }}',
+                    {% endfor %}
+                ],
+                datasets: [{
+                    label: 'Confidence',
+                    data: [
+                        {% for item in history[-10:]|reverse %}
+                            {{ item.confidence }},
+                        {% endfor %}
+                    ],
+                    backgroundColor: 'rgba(13, 110, 253, 0.2)',
+                    borderColor: 'rgba(13, 110, 253, 1)',
+                    borderWidth: 2,
+                    tension: 0.3,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 1,
+                        ticks: {
+                            callback: function(value) {
+                                return (value * 100) + '%';
+                            }
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            maxRotation: 45,
+                            minRotation: 45
+                        }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return 'Confidence: ' + (context.raw * 100).toFixed(1) + '%';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+
+{% block title %}Detection History - Civic Sentinel{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-history me-2"></i>Detection History
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if not history %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    No detection history available.
+                </div>
+                {% else %}
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <button id="clearHistory" class="btn btn-outline-danger">
+                            <i class="fas fa-trash me-2"></i>Clear History
+                        </button>
+                    </div>
+                    <div class="col-md-4">
+                        <button id="exportCSV" class="btn btn-outline-success">
+                            <i class="fas fa-file-csv me-2"></i>Export CSV
+                        </button>
+                    </div>
+                    <div class="col-md-4">
+                        <button id="exportJSON" class="btn btn-outline-primary">
+                            <i class="fas fa-file-code me-2"></i>Export JSON
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0">Filters</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="predictionFilter" class="form-label">Filter by Prediction:</label>
+                                <select id="predictionFilter" class="form-select">
+                                    <option value="all">All</option>
+                                    <option value="normal">Normal</option>
+                                    <option value="pothole">Pothole</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="confidenceFilter" class="form-label">Minimum Confidence:</label>
+                                <input type="range" class="form-range" id="confidenceFilter" min="0" max="100" value="0">
+                                <div class="d-flex justify-content-between">
+                                    <span>0%</span>
+                                    <span id="confidenceValue">0%</span>
+                                    <span>100%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="historyResults">
+                    <h6 class="mb-3">Results: <span id="resultCount">{{ history|length }}</span> items</h6>
+                    
+                    {% for item in history %}
+                    <div class="history-item card mb-3" 
+                         data-prediction="{{ item.prediction }}" 
+                         data-confidence="{{ item.confidence }}">
+                        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0">
+                                <i class="fas fa-image me-2"></i>{{ item.image_name }}
+                            </h6>
+                            <span class="badge {% if item.is_anomaly %}bg-danger{% else %}bg-success{% endif %}">
+                                {{ item.prediction|title }}
+                            </span>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><strong>Timestamp:</strong> {{ item.timestamp }}</p>
+                                    <p><strong>Prediction:</strong> {{ item.prediction|title }}</p>
+                                    <p><strong>Confidence:</strong> {{ "%.1f"|format(item.confidence * 100) }}%</p>
+                                    <p><strong>Status:</strong> 
+                                        {% if item.is_anomaly %}
+                                        <span class="text-danger">Anomaly Detected</span>
+                                        {% else %}
+                                        <span class="text-success">Normal Road</span>
+                                        {% endif %}
+                                    </p>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="progress mb-3" style="height: 25px;">
+                                        <div class="progress-bar bg-success" role="progressbar" 
+                                             style="width: {{ item.probabilities.plain * 100 }}%">
+                                            Normal: {{ "%.1f"|format(item.probabilities.plain * 100) }}%
+                                        </div>
+                                    </div>
+                                    <div class="progress" style="height: 25px;">
+                                        <div class="progress-bar bg-danger" role="progressbar" 
+                                             style="width: {{ item.probabilities.pothole * 100 }}%">
+                                            Pothole: {{ "%.1f"|format(item.probabilities.pothole * 100) }}%
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% if history %}
+<script>
+    $(document).ready(function() {
+        // Filter functionality
+        function applyFilters() {
+            const predictionFilter = $('#predictionFilter').val();
+            const confidenceFilter = parseFloat($('#confidenceFilter').val()) / 100;
+            let count = 0;
+            
+            $('.history-item').each(function() {
+                const prediction = $(this).data('prediction');
+                const confidence = parseFloat($(this).data('confidence'));
+                
+                const predictionMatch = predictionFilter === 'all' || prediction === predictionFilter;
+                const confidenceMatch = confidence >= confidenceFilter;
+                
+                if (predictionMatch && confidenceMatch) {
+                    $(this).show();
+                    count++;
+                } else {
+                    $(this).hide();
+                }
+            });
+            
+            $('#resultCount').text(count);
+        }
+        
+        $('#predictionFilter').change(applyFilters);
+        
+        $('#confidenceFilter').on('input', function() {
+            const value = $(this).val();
+            $('#confidenceValue').text(value + '%');
+            applyFilters();
+        });
+        
+        // Export functionality
+        $('#exportCSV').click(function() {
+            const visibleItems = $('.history-item:visible');
+            let csvContent = 'data:text/csv;charset=utf-8,';
+            csvContent += 'Timestamp,Image,Prediction,Confidence,Status\n';
+            
+            visibleItems.each(function() {
+                const timestamp = $(this).find('p:contains("Timestamp")').text().replace('Timestamp: ', '');
+                const image = $(this).find('h6').text().trim();
+                const prediction = $(this).find('p:contains("Prediction")').text().replace('Prediction: ', '');
+                const confidence = $(this).find('p:contains("Confidence")').text().replace('Confidence: ', '');
+                const status = $(this).find('p:contains("Status")').text().replace('Status: ', '').trim();
+                
+                csvContent += `${timestamp},${image},${prediction},${confidence},${status}\n`;
+            });
+            
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement('a');
+            link.setAttribute('href', encodedUri);
+            link.setAttribute('download', 'detection_history.csv');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+        
+        // Clear history confirmation
+        $('#clearHistory').click(function() {
+            if (confirm('Are you sure you want to clear all detection history? This action cannot be undone.')) {
+                // Send request to clear history
+                window.location.href = "{{ url_for('main.history') }}?clear=true";
+            }
+        });
+    });
+</script>
+{% endif %}
+{% endblock %}
