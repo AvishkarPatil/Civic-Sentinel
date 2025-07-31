@@ -1,0 +1,152 @@
+{
+    "name": "Civic Sentinel - Infrastructure Anomaly Detection",
+    "short_name": "Civic Sentinel",
+    "description": "AI-powered civic infrastructure anomaly detection system for municipalities",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#0d6efd",
+    "orientation": "portrait-primary",
+    "scope": "/",
+    "lang": "en-US",
+    "categories": ["utilities", "productivity", "government"],
+    "icons": [
+        {
+            "src": "/static/img/icon-72x72.png",
+            "sizes": "72x72",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/static/img/icon-96x96.png",
+            "sizes": "96x96",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/static/img/icon-128x128.png",
+            "sizes": "128x128",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/static/img/icon-144x144.png",
+            "sizes": "144x144",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/static/img/icon-152x152.png",
+            "sizes": "152x152",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/static/img/icon-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/static/img/icon-384x384.png",
+            "sizes": "384x384",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/static/img/icon-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "Detect Anomalies",
+            "short_name": "Detect",
+            "description": "Upload and analyze infrastructure images",
+            "url": "/detect",
+            "icons": [
+                {
+                    "src": "/static/img/shortcut-detect.png",
+                    "sizes": "96x96"
+                }
+            ]
+        },
+        {
+            "name": "View Analytics",
+            "short_name": "Analytics",
+            "description": "View detection analytics and insights",
+            "url": "/analytics",
+            "icons": [
+                {
+                    "src": "/static/img/shortcut-analytics.png",
+                    "sizes": "96x96"
+                }
+            ]
+        },
+        {
+            "name": "Detection History",
+            "short_name": "History",
+            "description": "Browse previous detection results",
+            "url": "/history",
+            "icons": [
+                {
+                    "src": "/static/img/shortcut-history.png",
+                    "sizes": "96x96"
+                }
+            ]
+        }
+    ],
+    "screenshots": [
+        {
+            "src": "/static/img/screenshot-desktop.png",
+            "sizes": "1280x720",
+            "type": "image/png",
+            "platform": "wide",
+            "label": "Desktop view of Civic Sentinel dashboard"
+        },
+        {
+            "src": "/static/img/screenshot-mobile.png",
+            "sizes": "375x667",
+            "type": "image/png",
+            "platform": "narrow",
+            "label": "Mobile view of detection interface"
+        }
+    ],
+    "related_applications": [],
+    "prefer_related_applications": false,
+    "edge_side_panel": {
+        "preferred_width": 400
+    },
+    "launch_handler": {
+        "client_mode": "navigate-existing"
+    },
+    "protocol_handlers": [
+        {
+            "protocol": "web+civicsentinel",
+            "url": "/detect?url=%s"
+        }
+    ],
+    "file_handlers": [
+        {
+            "action": "/detect",
+            "accept": {
+                "image/*": [".jpg", ".jpeg", ".png", ".bmp", ".webp"]
+            }
+        }
+    ],
+    "share_target": {
+        "action": "/detect",
+        "method": "POST",
+        "enctype": "multipart/form-data",
+        "params": {
+            "files": [
+                {
+                    "name": "file",
+                    "accept": ["image/*"]
+                }
+            ]
+        }
+    }
+}

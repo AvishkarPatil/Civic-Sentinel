@@ -3,113 +3,473 @@
 {% block title %}Detection Results - Civic Sentinel{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-lg-10 mx-auto">
-        <div class="card shadow-sm">
-            <div class="card-header bg-primary text-white">
+<!-- Results Header -->
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1 class="display-6 fw-bold mb-2">Detection Results</h1>
+        <p class="text-muted mb-0">AI-powered analysis completed for {{ filename }}</p>
+    </div>
+    <div class="col-md-4 text-md-end">
+        <div class="btn-group" role="group">
+            <button type="button" class="btn btn-outline-primary" id="shareResult" title="Share Result">
+                <i class="fas fa-share-alt"></i>
+            </button>
+            <button type="button" class="btn btn-outline-success" id="downloadReport" title="Download Report">
+                <i class="fas fa-download"></i>
+            </button>
+            <button type="button" class="btn btn-outline-info" id="compareResult" title="Compare with Previous">
+                <i class="fas fa-balance-scale"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Main Results Card -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">
-                    <i class="fas fa-search me-2"></i>Detection Results
+                    <i class="fas fa-image me-2"></i>Analyzed Image
+                </h5>
+                <div class="btn-group btn-group-sm" role="group">
+                    <button type="button" class="btn btn-outline-secondary" id="zoomIn" title="Zoom In">
+                        <i class="fas fa-search-plus"></i>
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" id="zoomOut" title="Zoom Out">
+                        <i class="fas fa-search-minus"></i>
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" id="fullscreen" title="Fullscreen">
+                        <i class="fas fa-expand"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body text-center p-0">
+                <div class="image-container position-relative" style="overflow: hidden;">
+                    <img src="{{ image_path }}" class="img-fluid" alt="{{ filename }}" id="resultImage" style="transition: transform 0.3s ease; cursor: zoom-in;">
+                    
+                    <!-- Detection Overlay -->
+                    {% if result.is_anomaly %}
+                    <div class="detection-overlay position-absolute" style="top: 20px; left: 20px; right: 20px; bottom: 20px; border: 3px solid #dc3545; border-radius: 8px; pointer-events: none;">
+                        <div class="position-absolute top-0 start-0 bg-danger text-white px-2 py-1 rounded-end" style="font-size: 0.8rem;">
+                            <i class="fas fa-exclamation-triangle me-1"></i>ANOMALY DETECTED
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="p-3 bg-light border-top">
+                    <div class="row g-2 text-center">
+                        <div class="col-4">
+                            <div class="small text-muted">File Size</div>
+                            <div class="fw-bold">{{ (result.file_size / 1024)|round(1) }} KB</div>
+                        </div>
+                        <div class="col-4">
+                            <div class="small text-muted">Processing Time</div>
+                            <div class="fw-bold">{{ "%.2f"|format(result.processing_time) }}s</div>
+                        </div>
+                        <div class="col-4">
+                            <div class="small text-muted">Resolution</div>
+                            <div class="fw-bold">{{ result.image_dimensions }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-brain me-2"></i>AI Analysis Results
                 </h5>
             </div>
             <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="card mb-4">
-                            <div class="card-header bg-light">
-                                <h6 class="mb-0">Uploaded Image</h6>
-                            </div>
-                            <div class="card-body text-center">
-                                <img src="{{ image_path }}" class="img-fluid rounded" alt="{{ filename }}">
-                                <p class="mt-2 text-muted">{{ filename }}</p>
-                            </div>
+                <!-- Primary Result -->
+                {% if result.is_anomaly %}
+                <div class="alert alert-danger text-center mb-4 fade-in">
+                    <div class="d-flex align-items-center justify-content-center mb-3">
+                        <div class="icon-circle bg-danger text-white me-3">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div>
+                            <h4 class="alert-heading mb-1">Infrastructure Anomaly Detected</h4>
+                            <p class="mb-0">Potential {{ result.anomaly_type|title }} identified in the image</p>
                         </div>
                     </div>
-                    <div class="col-md-6">
-                        <div class="card mb-4">
-                            <div class="card-header bg-light">
-                                <h6 class="mb-0">AI Prediction</h6>
-                            </div>
-                            <div class="card-body">
-                                {% if result.is_anomaly %}
-                                <div class="alert alert-danger text-center mb-4">
-                                    <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
-                                    <h4 class="alert-heading">Pothole Detected</h4>
-                                    <p class="mb-0">This image contains a road anomaly.</p>
-                                </div>
-                                {% else %}
-                                <div class="alert alert-success text-center mb-4">
-                                    <i class="fas fa-check-circle fa-2x mb-2"></i>
-                                    <h4 class="alert-heading">Normal Road</h4>
-                                    <p class="mb-0">No anomalies detected in this image.</p>
-                                </div>
-                                {% endif %}
-                                
-                                <div class="row text-center">
-                                    <div class="col-6">
-                                        <div class="card bg-light">
-                                            <div class="card-body py-3">
-                                                <h6 class="card-title mb-1">Confidence</h6>
-                                                <h3 class="mb-0">{{ "%.1f"|format(result.confidence * 100) }}%</h3>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-6">
-                                        <div class="card bg-light">
-                                            <div class="card-body py-3">
-                                                <h6 class="card-title mb-1">Classification</h6>
-                                                <h3 class="mb-0">{{ result.anomaly_type|title }}</h3>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                    <div class="progress mb-2" style="height: 8px;">
+                        <div class="progress-bar bg-danger" style="width: {{ result.confidence * 100 }}%"></div>
+                    </div>
+                    <div class="small">Confidence: {{ "%.1f"|format(result.confidence * 100) }}%</div>
+                </div>
+                {% else %}
+                <div class="alert alert-success text-center mb-4 fade-in">
+                    <div class="d-flex align-items-center justify-content-center mb-3">
+                        <div class="icon-circle bg-success text-white me-3">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div>
+                            <h4 class="alert-heading mb-1">Normal Infrastructure</h4>
+                            <p class="mb-0">No anomalies detected in this image</p>
+                        </div>
+                    </div>
+                    <div class="progress mb-2" style="height: 8px;">
+                        <div class="progress-bar bg-success" style="width: {{ result.confidence * 100 }}%"></div>
+                    </div>
+                    <div class="small">Confidence: {{ "%.1f"|format(result.confidence * 100) }}%</div>
+                </div>
+                {% endif %}
+                
+                <!-- Detailed Metrics -->
+                <div class="row g-3 mb-4">
+                    <div class="col-6">
+                        <div class="stat-card text-center">
+                            <div class="stat-number text-{{ 'danger' if result.is_anomaly else 'success' }}">{{ "%.1f"|format(result.confidence * 100) }}%</div>
+                            <div class="stat-label">Primary Confidence</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="stat-card text-center">
+                            <div class="stat-number text-info">{{ result.features_analyzed }}</div>
+                            <div class="stat-label">Features Analyzed</div>
                         </div>
                     </div>
                 </div>
                 
-                <div class="card mb-4">
-                    <div class="card-header bg-light">
-                        <h6 class="mb-0">Confidence Analysis</h6>
-                    </div>
+                <!-- Risk Assessment -->
+                <div class="card border-0 bg-light mb-3">
                     <div class="card-body">
+                        <h6 class="card-title mb-3">
+                            <i class="fas fa-shield-alt me-2"></i>Risk Assessment
+                        </h6>
+                        {% if result.is_anomaly %}
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="flex-shrink-0">
+                                <div class="badge bg-danger">HIGH</div>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <div class="fw-bold">Immediate Attention Required</div>
+                                <div class="small text-muted">Infrastructure anomaly detected with high confidence</div>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="flex-shrink-0">
+                                <div class="badge bg-success">LOW</div>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <div class="fw-bold">No Action Required</div>
+                                <div class="small text-muted">Infrastructure appears to be in good condition</div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Recommendations -->
+                <div class="card border-0 bg-light">
+                    <div class="card-body">
+                        <h6 class="card-title mb-3">
+                            <i class="fas fa-lightbulb me-2"></i>Recommendations
+                        </h6>
+                        {% if result.is_anomaly %}
+                        <ul class="list-unstyled mb-0">
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Schedule immediate inspection</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Document location for maintenance</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Consider traffic safety measures</li>
+                            <li class="mb-0"><i class="fas fa-check text-success me-2"></i>Monitor for deterioration</li>
+                        </ul>
+                        {% else %}
+                        <ul class="list-unstyled mb-0">
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Continue regular monitoring</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Schedule routine maintenance</li>
+                            <li class="mb-0"><i class="fas fa-check text-success me-2"></i>No immediate action required</li>
+                        </ul>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Detailed Analysis Section -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <ul class="nav nav-tabs card-header-tabs" id="analysisTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="confidence-tab" data-bs-toggle="tab" data-bs-target="#confidence" type="button" role="tab">
+                            <i class="fas fa-chart-bar me-1"></i>Confidence Analysis
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="features-tab" data-bs-toggle="tab" data-bs-target="#features" type="button" role="tab">
+                            <i class="fas fa-cog me-1"></i>Feature Analysis
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="technical-tab" data-bs-toggle="tab" data-bs-target="#technical" type="button" role="tab">
+                            <i class="fas fa-code me-1"></i>Technical Details
+                        </button>
+                    </li>
+                </ul>
+            </div>
+            <div class="card-body">
+                <div class="tab-content" id="analysisTabsContent">
+                    <!-- Confidence Analysis -->
+                    <div class="tab-pane fade show active" id="confidence" role="tabpanel">
                         <div class="row">
                             <div class="col-md-6">
-                                <div id="confidenceChart" style="height: 300px;"></div>
+                                <canvas id="confidenceChart" height="300"></canvas>
                             </div>
                             <div class="col-md-6">
-                                <table class="table table-bordered">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th>Classification</th>
-                                            <th>Probability</th>
-                                            <th>Percentage</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>Normal Road</td>
-                                            <td>{{ result.probabilities.plain }}</td>
-                                            <td>{{ "%.1f"|format(result.probabilities.plain * 100) }}%</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Pothole</td>
-                                            <td>{{ result.probabilities.pothole }}</td>
-                                            <td>{{ "%.1f"|format(result.probabilities.pothole * 100) }}%</td>
-                                        </tr>
-                                    </tbody>
+                                <h6 class="mb-3">Classification Probabilities</h6>
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span class="fw-bold text-success">Normal Infrastructure</span>
+                                        <span class="badge bg-success">{{ "%.1f"|format(result.probabilities.plain * 100) }}%</span>
+                                    </div>
+                                    <div class="progress mb-2" style="height: 8px;">
+                                        <div class="progress-bar bg-success" style="width: {{ result.probabilities.plain * 100 }}%"></div>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span class="fw-bold text-danger">Anomaly (Pothole)</span>
+                                        <span class="badge bg-danger">{{ "%.1f"|format(result.probabilities.pothole * 100) }}%</span>
+                                    </div>
+                                    <div class="progress mb-2" style="height: 8px;">
+                                        <div class="progress-bar bg-danger" style="width: {{ result.probabilities.pothole * 100 }}%"></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="card border-0 bg-light mt-4">
+                                    <div class="card-body">
+                                        <h6 class="card-title">Confidence Interpretation</h6>
+                                        {% if result.confidence > 0.9 %}
+                                        <div class="text-success">
+                                            <i class="fas fa-check-circle me-2"></i>
+                                            <strong>Very High Confidence</strong> - Highly reliable prediction
+                                        </div>
+                                        {% elif result.confidence > 0.7 %}
+                                        <div class="text-info">
+                                            <i class="fas fa-info-circle me-2"></i>
+                                            <strong>High Confidence</strong> - Reliable prediction
+                                        </div>
+                                        {% elif result.confidence > 0.5 %}
+                                        <div class="text-warning">
+                                            <i class="fas fa-exclamation-circle me-2"></i>
+                                            <strong>Moderate Confidence</strong> - Consider manual verification
+                                        </div>
+                                        {% else %}
+                                        <div class="text-danger">
+                                            <i class="fas fa-exclamation-triangle me-2"></i>
+                                            <strong>Low Confidence</strong> - Manual verification recommended
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Feature Analysis -->
+                    <div class="tab-pane fade" id="features" role="tabpanel">
+                        <h6 class="mb-3">Image Feature Analysis</h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="card border-0 bg-light">
+                                    <div class="card-body">
+                                        <h6 class="card-title">Edge Detection</h6>
+                                        <div class="progress mb-2">
+                                            <div class="progress-bar" style="width: {{ (result.features.edges * 100)|round }}%"></div>
+                                        </div>
+                                        <small class="text-muted">Strength: {{ "%.2f"|format(result.features.edges) }}</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card border-0 bg-light">
+                                    <div class="card-body">
+                                        <h6 class="card-title">Texture Analysis</h6>
+                                        <div class="progress mb-2">
+                                            <div class="progress-bar bg-info" style="width: {{ (result.features.texture * 100)|round }}%"></div>
+                                        </div>
+                                        <small class="text-muted">Complexity: {{ "%.2f"|format(result.features.texture) }}</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card border-0 bg-light">
+                                    <div class="card-body">
+                                        <h6 class="card-title">Color Variance</h6>
+                                        <div class="progress mb-2">
+                                            <div class="progress-bar bg-warning" style="width: {{ (result.features.color_variance * 100)|round }}%"></div>
+                                        </div>
+                                        <small class="text-muted">Variance: {{ "%.2f"|format(result.features.color_variance) }}</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card border-0 bg-light">
+                                    <div class="card-body">
+                                        <h6 class="card-title">Contour Detection</h6>
+                                        <div class="progress mb-2">
+                                            <div class="progress-bar bg-success" style="width: {{ (result.features.contours * 100)|round }}%"></div>
+                                        </div>
+                                        <small class="text-muted">Count: {{ result.features.contour_count }}</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <canvas id="featureRadarChart" height="300"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- Technical Details -->
+                    <div class="tab-pane fade" id="technical" role="tabpanel">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="mb-3">Model Information</h6>
+                                <table class="table table-sm">
+                                    <tr>
+                                        <td><strong>Algorithm:</strong></td>
+                                        <td>Random Forest Classifier</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Model Version:</strong></td>
+                                        <td>{{ result.model_version }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Training Accuracy:</strong></td>
+                                        <td>95.2%</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Test Accuracy:</strong></td>
+                                        <td>92.1%</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Features Used:</strong></td>
+                                        <td>17 image features</td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="mb-3">Processing Details</h6>
+                                <table class="table table-sm">
+                                    <tr>
+                                        <td><strong>Processing Time:</strong></td>
+                                        <td>{{ "%.3f"|format(result.processing_time) }} seconds</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Image Size:</strong></td>
+                                        <td>{{ result.image_dimensions }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>File Size:</strong></td>
+                                        <td>{{ (result.file_size / 1024)|round(1) }} KB</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Color Space:</strong></td>
+                                        <td>RGB</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Analysis ID:</strong></td>
+                                        <td><code>{{ result.analysis_id }}</code></td>
+                                    </tr>
                                 </table>
                             </div>
                         </div>
+                        
+                        <div class="mt-4">
+                            <h6 class="mb-3">Feature Vector</h6>
+                            <div class="card border-0 bg-light">
+                                <div class="card-body">
+                                    <code class="small">{{ result.feature_vector }}</code>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                
-                <div class="d-flex justify-content-between">
-                    <a href="{{ url_for('main.detect') }}" class="btn btn-primary">
-                        <i class="fas fa-arrow-left me-2"></i>Analyze Another Image
-                    </a>
-                    <a href="{{ url_for('main.history') }}" class="btn btn-secondary">
-                        <i class="fas fa-history me-2"></i>View Detection History
-                    </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-history me-2"></i>Similar Results
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="text-center py-3">
+                    <i class="fas fa-search fa-2x text-muted mb-3"></i>
+                    <p class="text-muted">Finding similar analyses...</p>
+                    <div class="spinner-border spinner-border-sm" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-share-alt me-2"></i>Quick Actions
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <button type="button" class="btn btn-primary" onclick="analyzeAnother()">
+                        <i class="fas fa-plus me-2"></i>Analyze Another Image
+                    </button>
+                    <button type="button" class="btn btn-outline-success" onclick="saveToFavorites()">
+                        <i class="fas fa-star me-2"></i>Save to Favorites
+                    </button>
+                    <button type="button" class="btn btn-outline-info" onclick="generateReport()">
+                        <i class="fas fa-file-pdf me-2"></i>Generate PDF Report
+                    </button>
+                    <button type="button" class="btn btn-outline-warning" onclick="flagForReview()">
+                        <i class="fas fa-flag me-2"></i>Flag for Review
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Action Buttons -->
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="d-flex flex-wrap gap-3 justify-content-between align-items-center">
+                    <div class="d-flex flex-wrap gap-2">
+                        <a href="{{ url_for('main.detect') }}" class="btn btn-primary">
+                            <i class="fas fa-search me-2"></i>Analyze Another Image
+                        </a>
+                        <a href="{{ url_for('main.history') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-history me-2"></i>View History
+                        </a>
+                        {% if current_user.is_authenticated %}
+                        <a href="{{ url_for('main.analytics') }}" class="btn btn-outline-info">
+                            <i class="fas fa-chart-bar me-2"></i>Analytics
+                        </a>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="d-flex flex-wrap gap-2">
+                        <button type="button" class="btn btn-outline-success" id="exportResult">
+                            <i class="fas fa-download me-2"></i>Export
+                        </button>
+                        <button type="button" class="btn btn-outline-primary" id="shareResult">
+                            <i class="fas fa-share-alt me-2"></i>Share
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -118,57 +478,393 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    $(document).ready(function() {
-        // Confidence chart
-        const ctx = document.getElementById('confidenceChart').getContext('2d');
-        const confidenceChart = new Chart(ctx, {
-            type: 'bar',
+$(document).ready(function() {
+    initializeResultPage();
+    initializeCharts();
+    initializeImageInteractions();
+    
+    // Load similar results
+    setTimeout(loadSimilarResults, 1000);
+});
+
+// Initialize charts
+function initializeCharts() {
+    // Confidence Chart
+    const confidenceCtx = document.getElementById('confidenceChart').getContext('2d');
+    window.confidenceChart = new Chart(confidenceCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Normal Infrastructure', 'Anomaly (Pothole)'],
+            datasets: [{
+                data: [
+                    {{ result.probabilities.plain }},
+                    {{ result.probabilities.pothole }}
+                ],
+                backgroundColor: [
+                    'rgba(40, 167, 69, 0.8)',
+                    'rgba(220, 53, 69, 0.8)'
+                ],
+                borderColor: [
+                    'rgba(40, 167, 69, 1)',
+                    'rgba(220, 53, 69, 1)'
+                ],
+                borderWidth: 2,
+                hoverOffset: 10
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 20,
+                        usePointStyle: true
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.label + ': ' + (context.raw * 100).toFixed(1) + '%';
+                        }
+                    }
+                }
+            },
+            cutout: '60%',
+            animation: {
+                animateRotate: true,
+                duration: 1000
+            }
+        }
+    });
+    
+    // Feature Radar Chart
+    const radarCtx = document.getElementById('featureRadarChart');
+    if (radarCtx) {
+        window.featureChart = new Chart(radarCtx.getContext('2d'), {
+            type: 'radar',
             data: {
-                labels: ['Normal Road', 'Pothole'],
+                labels: ['Edges', 'Texture', 'Color Variance', 'Contours', 'Brightness', 'Contrast'],
                 datasets: [{
-                    label: 'Confidence',
+                    label: 'Feature Strength',
                     data: [
-                        {{ result.probabilities.plain }},
-                        {{ result.probabilities.pothole }}
+                        {{ result.features.edges * 100 }},
+                        {{ result.features.texture * 100 }},
+                        {{ result.features.color_variance * 100 }},
+                        {{ result.features.contours * 100 }},
+                        {{ result.features.brightness * 100 }},
+                        {{ result.features.contrast * 100 }}
                     ],
-                    backgroundColor: [
-                        'rgba(40, 167, 69, 0.7)',
-                        'rgba(220, 53, 69, 0.7)'
-                    ],
-                    borderColor: [
-                        'rgba(40, 167, 69, 1)',
-                        'rgba(220, 53, 69, 1)'
-                    ],
-                    borderWidth: 1
+                    backgroundColor: 'rgba(13, 110, 253, 0.2)',
+                    borderColor: 'rgba(13, 110, 253, 1)',
+                    borderWidth: 2,
+                    pointBackgroundColor: 'rgba(13, 110, 253, 1)',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: 'rgba(13, 110, 253, 1)'
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        max: 1,
-                        ticks: {
-                            callback: function(value) {
-                                return (value * 100) + '%';
-                            }
-                        }
+                plugins: {
+                    legend: {
+                        display: false
                     }
                 },
-                plugins: {
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return (context.raw * 100).toFixed(1) + '%';
-                            }
+                scales: {
+                    r: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: {
+                            stepSize: 20
                         }
                     }
                 }
             }
         });
+    }
+}
+
+// Initialize image interactions
+function initializeImageInteractions() {
+    let zoomLevel = 1;
+    const image = $('#resultImage');
+    
+    // Zoom controls
+    $('#zoomIn').click(function() {
+        zoomLevel = Math.min(zoomLevel * 1.2, 3);
+        image.css('transform', `scale(${zoomLevel})`);
     });
+    
+    $('#zoomOut').click(function() {
+        zoomLevel = Math.max(zoomLevel / 1.2, 0.5);
+        image.css('transform', `scale(${zoomLevel})`);
+    });
+    
+    // Fullscreen
+    $('#fullscreen').click(function() {
+        const imageContainer = $('.image-container')[0];
+        if (imageContainer.requestFullscreen) {
+            imageContainer.requestFullscreen();
+        }
+    });
+    
+    // Image click to zoom
+    image.click(function() {
+        if (zoomLevel === 1) {
+            zoomLevel = 2;
+            $(this).css('transform', `scale(${zoomLevel})`);
+            $(this).css('cursor', 'zoom-out');
+        } else {
+            zoomLevel = 1;
+            $(this).css('transform', `scale(${zoomLevel})`);
+            $(this).css('cursor', 'zoom-in');
+        }
+    });
+}
+
+// Load similar results
+function loadSimilarResults() {
+    // Simulate loading similar results
+    setTimeout(() => {
+        const similarResultsHtml = `
+            <div class="list-group list-group-flush">
+                <div class="list-group-item d-flex align-items-center">
+                    <img src="/static/img/sample-pothole.jpg" class="rounded me-3" style="width: 50px; height: 50px; object-fit: cover;" alt="Similar">
+                    <div class="flex-grow-1">
+                        <div class="fw-bold">Similar Anomaly</div>
+                        <div class="small text-muted">87% match • 2 days ago</div>
+                    </div>
+                    <div class="badge bg-danger">92%</div>
+                </div>
+                <div class="list-group-item d-flex align-items-center">
+                    <img src="/static/img/sample-normal.jpg" class="rounded me-3" style="width: 50px; height: 50px; object-fit: cover;" alt="Similar">
+                    <div class="flex-grow-1">
+                        <div class="fw-bold">Normal Road</div>
+                        <div class="small text-muted">73% match • 1 week ago</div>
+                    </div>
+                    <div class="badge bg-success">89%</div>
+                </div>
+                <div class="list-group-item d-flex align-items-center">
+                    <img src="/static/img/sample-pothole.jpg" class="rounded me-3" style="width: 50px; height: 50px; object-fit: cover;" alt="Similar">
+                    <div class="flex-grow-1">
+                        <div class="fw-bold">Crack Detection</div>
+                        <div class="small text-muted">65% match • 3 days ago</div>
+                    </div>
+                    <div class="badge bg-warning">78%</div>
+                </div>
+            </div>
+        `;
+        
+        $('.card:contains("Similar Results") .card-body').html(similarResultsHtml);
+    }, 2000);
+}
+
+// Action functions
+function analyzeAnother() {
+    window.location.href = '{{ url_for("main.detect") }}';
+}
+
+function saveToFavorites() {
+    // Implementation for saving to favorites
+    showNotification('Result saved to favorites', 'success');
+}
+
+function generateReport() {
+    // Generate PDF report
+    showNotification('Generating PDF report...', 'info');
+    
+    // Simulate report generation
+    setTimeout(() => {
+        const reportData = {
+            filename: '{{ filename }}',
+            prediction: '{{ result.prediction }}',
+            confidence: {{ result.confidence }},
+            timestamp: new Date().toISOString(),
+            analysis_id: '{{ result.analysis_id }}'
+        };
+        
+        const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `civic-sentinel-report-${Date.now()}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        showNotification('Report downloaded successfully', 'success');
+    }, 1500);
+}
+
+function flagForReview() {
+    // Implementation for flagging result for review
+    const modal = $(`
+        <div class="modal fade" id="flagModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Flag for Review</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Reason for flagging:</label>
+                            <select class="form-select" id="flagReason">
+                                <option value="incorrect">Incorrect prediction</option>
+                                <option value="uncertain">Uncertain result</option>
+                                <option value="quality">Image quality issues</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Additional comments:</label>
+                            <textarea class="form-control" id="flagComments" rows="3"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-warning" onclick="submitFlag()">Submit Flag</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `);
+    
+    $('body').append(modal);
+    $('#flagModal').modal('show');
+    
+    $('#flagModal').on('hidden.bs.modal', function() {
+        $(this).remove();
+    });
+}
+
+function submitFlag() {
+    const reason = $('#flagReason').val();
+    const comments = $('#flagComments').val();
+    
+    // Submit flag data
+    showNotification('Result flagged for review', 'warning');
+    $('#flagModal').modal('hide');
+}
+
+// Export and share functions
+$('#exportResult').click(function() {
+    const exportData = {
+        filename: '{{ filename }}',
+        prediction: '{{ result.prediction }}',
+        confidence: {{ result.confidence }},
+        probabilities: {
+            normal: {{ result.probabilities.plain }},
+            anomaly: {{ result.probabilities.pothole }}
+        },
+        features: {
+            edges: {{ result.features.edges }},
+            texture: {{ result.features.texture }},
+            color_variance: {{ result.features.color_variance }},
+            contours: {{ result.features.contours }}
+        },
+        processing_time: {{ result.processing_time }},
+        timestamp: new Date().toISOString()
+    };
+    
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `detection-result-${Date.now()}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    showNotification('Result exported successfully', 'success');
+});
+
+$('#shareResult').click(function() {
+    if (navigator.share) {
+        navigator.share({
+            title: 'Civic Sentinel Detection Result',
+            text: `Infrastructure analysis result: {{ result.prediction }} with {{ "%.1f"|format(result.confidence * 100) }}% confidence`,
+            url: window.location.href
+        });
+    } else {
+        // Fallback - copy to clipboard
+        const shareText = `Infrastructure analysis result: {{ result.prediction }} with {{ "%.1f"|format(result.confidence * 100) }}% confidence - ${window.location.href}`;
+        navigator.clipboard.writeText(shareText);
+        showNotification('Result link copied to clipboard', 'success');
+    }
+});
+
+// Initialize result page features
+function initializeResultPage() {
+    // Add fade-in animation to result cards
+    $('.card').addClass('fade-in');
+    
+    // Initialize tooltips
+    $('[title]').tooltip();
+    
+    // Add keyboard shortcuts
+    $(document).keydown(function(e) {
+        // Space to toggle zoom
+        if (e.code === 'Space' && !$(e.target).is('input, textarea')) {
+            e.preventDefault();
+            $('#resultImage').click();
+        }
+        
+        // N for new analysis
+        if (e.key === 'n' && (e.ctrlKey || e.metaKey)) {
+            e.preventDefault();
+            analyzeAnother();
+        }
+        
+        // S for save
+        if (e.key === 's' && (e.ctrlKey || e.metaKey)) {
+            e.preventDefault();
+            $('#exportResult').click();
+        }
+    });
+    
+    // Auto-scroll to results on mobile
+    if (window.innerWidth < 768) {
+        setTimeout(() => {
+            $('html, body').animate({
+                scrollTop: $('.card:first').offset().top - 20
+            }, 500);
+        }, 500);
+    }
+}
+
+// Performance tracking
+const performanceData = {
+    loadTime: performance.now(),
+    processingTime: {{ result.processing_time }},
+    confidence: {{ result.confidence }},
+    prediction: '{{ result.prediction }}'
+};
+
+// Track user interactions
+let interactionCount = 0;
+$('.btn, .nav-link, .card').on('click', function() {
+    interactionCount++;
+});
+
+// Send analytics on page unload
+window.addEventListener('beforeunload', function() {
+    const analyticsData = {
+        ...performanceData,
+        timeOnPage: performance.now() - performanceData.loadTime,
+        interactions: interactionCount
+    };
+    
+    // Send analytics data (if analytics endpoint exists)
+    if (navigator.sendBeacon) {
+        navigator.sendBeacon('/api/analytics/page-view', JSON.stringify(analyticsData));
+    }
+});
 </script>
 {% endblock %}

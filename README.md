@@ -20,6 +20,8 @@
 
 Civic Sentinel is an advanced computer vision system designed to automatically detect road anomalies, specifically potholes, to help municipal authorities maintain better road infrastructure. The system uses machine learning to analyze road images and provide accurate predictions with confidence scores.
 
+
+#### Demo Video  : https://drive.google.com/file/d/11axw_5vhLn6ePueodgpxo_RSoU81MIPw/view?usp=sharing
 ## ✨ Features
 
 - 🤖 **AI-Powered Detection** - Random Forest classifier with 95% training accuracy
