@@ -3,7 +3,7 @@ Flask-SQLAlchemy
 Flask-Login
 Pillow
 opencv-python-headless
-scikit-learn==1.3.0
+scikit-learn
 numpy
 pandas
 joblib
