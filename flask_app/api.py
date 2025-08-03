@@ -82,3 +82,32 @@ def detect():
             return jsonify({'error': 'Model not loaded'}), 503
     else:
         return jsonify({'error': 'File type not allowed'}), 400
+
+@api.route('/analytics', methods=['GET'])
+def analytics():
+    """API endpoint for analytics data"""
+    from .models import Detection
+    
+    detections = Detection.query.all()
+    total_detections = len(detections)
+    anomalies_found = sum(1 for d in detections if d.is_anomaly)
+    normal_found = total_detections - anomalies_found
+    
+    if total_detections > 0:
+        avg_confidence = sum(d.confidence for d in detections) / total_detections
+        accuracy_rate = avg_confidence * 100
+    else:
+        avg_confidence = 0
+        accuracy_rate = 0
+    
+    recent_detections = Detection.query.order_by(Detection.created_at.desc()).limit(5).all()
+    
+    return jsonify({
+        'status': 'success',
+        'total_detections': total_detections,
+        'anomalies_found': anomalies_found,
+        'normal_found': normal_found,
+        'accuracy_rate': round(accuracy_rate, 1),
+        'avg_confidence': round(avg_confidence * 100, 1),
+        'recent_activity': [d.to_dict() for d in recent_detections]
+    })

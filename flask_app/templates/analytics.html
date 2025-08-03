@@ -3,403 +3,251 @@
 {% block title %}Analytics Dashboard - Civic Sentinel{% endblock %}
 
 {% block content %}
-<!-- Dashboard Header -->
-<div class="row mb-4">
-    <div class="col-md-8">
-        <h1 class="display-5 fw-bold mb-2">Analytics Dashboard</h1>
-        <p class="text-muted mb-0">Real-time insights and performance metrics for infrastructure anomaly detection</p>
-    </div>
-    <div class="col-md-4 text-md-end">
-        <div class="btn-group" role="group">
-            <button type="button" class="btn btn-outline-primary" id="refreshData" title="Refresh Data">
-                <i class="fas fa-sync-alt"></i>
-            </button>
-            <button type="button" class="btn btn-outline-success" id="exportData" title="Export Data">
-                <i class="fas fa-download"></i>
-            </button>
-            <button type="button" class="btn btn-outline-info" id="shareReport" title="Share Report">
-                <i class="fas fa-share-alt"></i>
-            </button>
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="display-6 fw-bold mb-2">Analytics Dashboard</h1>
+                    <p class="text-muted mb-0">Real-time insights and performance metrics</p>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-outline-primary" onclick="refreshData()">
+                        <i class="fas fa-sync-alt me-2"></i>Refresh
+                    </button>
+                    <button class="btn btn-outline-success" onclick="exportData()">
+                        <i class="fas fa-download me-2"></i>Export
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
-</div>
 
-{% if not history %}
-<!-- Empty State -->
-<div class="text-center py-5">
-    <div class="card border-0 shadow-sm">
-        <div class="card-body p-5">
-            <i class="fas fa-chart-bar fa-4x text-muted mb-4"></i>
-            <h3 class="mb-3">No Analytics Data Available</h3>
-            <p class="text-muted mb-4">Start analyzing images to see detailed insights and performance metrics here.</p>
-            <a href="{{ url_for('main.detect') }}" class="btn btn-primary btn-lg">
-                <i class="fas fa-search me-2"></i>Start Detection
-            </a>
-        </div>
-    </div>
-</div>
-{% else %}
-
-<!-- Key Metrics Cards -->
-<div class="row g-4 mb-5">
-    <div class="col-lg-3 col-md-6">
-        <div class="stat-card fade-in">
-            <div class="d-flex align-items-center">
-                <div class="flex-shrink-0">
-                    <div class="icon-circle bg-primary text-white">
+    {% if history %}
+    <!-- Stats Cards -->
+    <div class="row g-4 mb-5">
+        <div class="col-lg-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <div class="icon-circle bg-primary text-white mx-auto mb-3">
                         <i class="fas fa-images"></i>
                     </div>
-                </div>
-                <div class="flex-grow-1 ms-3">
-                    <div class="stat-number" data-stat="total">{{ history|length }}</div>
-                    <div class="stat-label">Total Analyzed</div>
+                    <h2 class="display-6 fw-bold text-primary mb-2">{{ history|length }}</h2>
+                    <p class="text-muted mb-0">Total Analyzed</p>
                 </div>
             </div>
         </div>
-    </div>
-    
-    <div class="col-lg-3 col-md-6">
-        <div class="stat-card fade-in" style="animation-delay: 0.1s;">
-            <div class="d-flex align-items-center">
-                <div class="flex-shrink-0">
-                    <div class="icon-circle bg-success text-white">
+        
+        <div class="col-lg-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <div class="icon-circle bg-success text-white mx-auto mb-3">
                         <i class="fas fa-check-circle"></i>
                     </div>
-                </div>
-                <div class="flex-grow-1 ms-3">
-                    <div class="stat-number" data-stat="normal">{{ history|selectattr('prediction', 'equalto', 'normal')|list|length }}</div>
-                    <div class="stat-label">Normal Infrastructure</div>
+                    <h2 class="display-6 fw-bold text-success mb-2">{{ history|selectattr('prediction', 'equalto', 'normal')|list|length }}</h2>
+                    <p class="text-muted mb-0">Normal Infrastructure</p>
                 </div>
             </div>
         </div>
-    </div>
-    
-    <div class="col-lg-3 col-md-6">
-        <div class="stat-card fade-in" style="animation-delay: 0.2s;">
-            <div class="d-flex align-items-center">
-                <div class="flex-shrink-0">
-                    <div class="icon-circle bg-danger text-white">
+        
+        <div class="col-lg-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <div class="icon-circle bg-danger text-white mx-auto mb-3">
                         <i class="fas fa-exclamation-triangle"></i>
                     </div>
-                </div>
-                <div class="flex-grow-1 ms-3">
-                    <div class="stat-number" data-stat="anomalies">{{ history|selectattr('prediction', 'equalto', 'pothole')|list|length }}</div>
-                    <div class="stat-label">Anomalies Detected</div>
+                    <h2 class="display-6 fw-bold text-danger mb-2">{{ history|selectattr('prediction', 'equalto', 'pothole')|list|length }}</h2>
+                    <p class="text-muted mb-0">Anomalies Detected</p>
                 </div>
             </div>
         </div>
-    </div>
-    
-    <div class="col-lg-3 col-md-6">
-        <div class="stat-card fade-in" style="animation-delay: 0.3s;">
-            <div class="d-flex align-items-center">
-                <div class="flex-shrink-0">
-                    <div class="icon-circle bg-info text-white">
+        
+        <div class="col-lg-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <div class="icon-circle bg-info text-white mx-auto mb-3">
                         <i class="fas fa-percentage"></i>
                     </div>
-                </div>
-                <div class="flex-grow-1 ms-3">
                     {% set total_confidence = 0 %}
                     {% for item in history %}
                         {% set total_confidence = total_confidence + item.confidence %}
                     {% endfor %}
-                    <div class="stat-number" data-stat="accuracy">{{ "%.1f"|format((total_confidence / history|length) * 100) }}%</div>
-                    <div class="stat-label">Average Confidence</div>
+                    <h2 class="display-6 fw-bold text-info mb-2">{{ "%.1f"|format((total_confidence / history|length) * 100) }}%</h2>
+                    <p class="text-muted mb-0">Avg Confidence</p>
                 </div>
             </div>
         </div>
     </div>
-</div>
-<!-- Charts Section -->
-<div class="row g-4 mb-5">
-    <div class="col-lg-8">
-        <div class="card shadow-sm h-100">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">
-                    <i class="fas fa-chart-line me-2"></i>Detection Trends
-                </h5>
-                <div class="btn-group btn-group-sm" role="group">
-                    <input type="radio" class="btn-check" name="trendPeriod" id="trend7d" checked>
-                    <label class="btn btn-outline-primary" for="trend7d">7D</label>
-                    
-                    <input type="radio" class="btn-check" name="trendPeriod" id="trend30d">
-                    <label class="btn btn-outline-primary" for="trend30d">30D</label>
-                    
-                    <input type="radio" class="btn-check" name="trendPeriod" id="trendAll">
-                    <label class="btn btn-outline-primary" for="trendAll">All</label>
+
+    <!-- Charts Row -->
+    <div class="row g-4 mb-5">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 pb-0">
+                    <h5 class="card-title mb-0">Detection Trends</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="trendChart" height="300"></canvas>
                 </div>
             </div>
-            <div class="card-body">
-                <canvas id="trendChart" height="300"></canvas>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-lg-4">
-        <div class="card shadow-sm h-100">
-            <div class="card-header">
-                <h5 class="mb-0">
-                    <i class="fas fa-chart-pie me-2"></i>Detection Distribution
-                </h5>
-            </div>
-            <div class="card-body">
-                <canvas id="distributionChart" height="300"></canvas>
-                <div class="mt-3">
-                    <div class="row text-center">
-                        <div class="col-6">
-                            <div class="small text-muted">Normal</div>
-                            <div class="fw-bold text-success">{{ "%.1f"|format((history|selectattr('prediction', 'equalto', 'normal')|list|length / history|length) * 100) }}%</div>
-                        </div>
-                        <div class="col-6">
-                            <div class="small text-muted">Anomalies</div>
-                            <div class="fw-bold text-danger">{{ "%.1f"|format((history|selectattr('prediction', 'equalto', 'pothole')|list|length / history|length) * 100) }}%</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-                
-<!-- Performance Metrics -->
-<div class="row g-4 mb-5">
-    <div class="col-lg-6">
-        <div class="card shadow-sm">
-            <div class="card-header">
-                <h5 class="mb-0">
-                    <i class="fas fa-tachometer-alt me-2"></i>Model Performance
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="row g-3">
-                    <div class="col-6">
-                        <div class="text-center p-3 bg-light rounded">
-                            <div class="h3 text-primary mb-1">95%</div>
-                            <div class="small text-muted">Training Accuracy</div>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div class="text-center p-3 bg-light rounded">
-                            <div class="h3 text-success mb-1">92%</div>
-                            <div class="small text-muted">Test Accuracy</div>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div class="text-center p-3 bg-light rounded">
-                            <div class="h3 text-info mb-1">17</div>
-                            <div class="small text-muted">Features</div>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div class="text-center p-3 bg-light rounded">
-                            <div class="h3 text-warning mb-1">&lt;2s</div>
-                            <div class="small text-muted">Avg Processing</div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Confidence Distribution -->
-                <div class="mt-4">
-                    <h6 class="mb-3">Confidence Distribution</h6>
-                    <canvas id="confidenceHistogram" height="200"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-lg-6">
-        <div class="card shadow-sm">
-            <div class="card-header">
-                <h5 class="mb-0">
-                    <i class="fas fa-clock me-2"></i>Recent Activity
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="activity-timeline">
-                    {% for item in history[:5] %}
-                    <div class="activity-item d-flex align-items-center mb-3">
-                        <div class="activity-icon me-3">
-                            <div class="icon-circle bg-{{ 'danger' if item.prediction == 'pothole' else 'success' }} text-white" style="width: 40px; height: 40px; font-size: 0.9rem;">
-                                <i class="fas fa-{{ 'exclamation-triangle' if item.prediction == 'pothole' else 'check' }}"></i>
-                            </div>
-                        </div>
-                        <div class="activity-content flex-grow-1">
-                            <div class="fw-bold">{{ item.prediction|title }} Detected</div>
-                            <div class="small text-muted">{{ item.image_name }} • {{ "%.1f"|format(item.confidence * 100) }}% confidence</div>
-                            <div class="small text-muted">{{ item.timestamp }}</div>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-                <div class="text-center mt-3">
-                    <a href="{{ url_for('main.history') }}" class="btn btn-outline-primary btn-sm">
-                        <i class="fas fa-history me-1"></i>View All Activity
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-                
-<!-- Detailed Analytics Table -->
-<div class="card shadow-sm">
-    <div class="card-header d-flex justify-content-between align-items-center">
-        <h5 class="mb-0">
-            <i class="fas fa-table me-2"></i>Detection History
-        </h5>
-        <div class="d-flex gap-2">
-            <input type="search" class="form-control form-control-sm" placeholder="Search..." id="searchTable" style="width: 200px;">
-            <select class="form-select form-select-sm" id="filterStatus" style="width: 150px;">
-                <option value="">All Status</option>
-                <option value="normal">Normal</option>
-                <option value="pothole">Anomaly</option>
-            </select>
-        </div>
-    </div>
-    <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-hover mb-0" id="detectionTable">
-                <thead class="table-light">
-                    <tr>
-                        <th class="sortable" data-sort="timestamp">
-                            <i class="fas fa-clock me-1"></i>Timestamp
-                            <i class="fas fa-sort ms-1 text-muted"></i>
-                        </th>
-                        <th class="sortable" data-sort="image">
-                            <i class="fas fa-image me-1"></i>Image
-                            <i class="fas fa-sort ms-1 text-muted"></i>
-                        </th>
-                        <th class="sortable" data-sort="prediction">
-                            <i class="fas fa-brain me-1"></i>Prediction
-                            <i class="fas fa-sort ms-1 text-muted"></i>
-                        </th>
-                        <th class="sortable" data-sort="confidence">
-                            <i class="fas fa-percentage me-1"></i>Confidence
-                            <i class="fas fa-sort ms-1 text-muted"></i>
-                        </th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for item in history[:20] %}
-                    <tr data-status="{{ item.prediction }}">
-                        <td>
-                            <div class="small">{{ item.timestamp }}</div>
-                        </td>
-                        <td>
-                            <div class="d-flex align-items-center">
-                                <div class="me-2">
-                                    <i class="fas fa-image text-muted"></i>
-                                </div>
-                                <div>
-                                    <div class="fw-bold">{{ item.image_name }}</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            <span class="badge bg-{{ 'danger' if item.prediction == 'pothole' else 'success' }}">
-                                {{ item.prediction|title }}
-                            </span>
-                        </td>
-                        <td>
-                            <div class="d-flex align-items-center">
-                                <div class="progress me-2" style="width: 60px; height: 8px;">
-                                    <div class="progress-bar bg-{{ 'danger' if item.prediction == 'pothole' else 'success' }}" 
-                                         style="width: {{ item.confidence * 100 }}%"></div>
-                                </div>
-                                <span class="small">{{ "%.1f"|format(item.confidence * 100) }}%</span>
-                            </div>
-                        </td>
-                        <td>
-                            {% if item.prediction == 'pothole' %}
-                            <span class="badge bg-danger-subtle text-danger">
-                                <i class="fas fa-exclamation-triangle me-1"></i>Anomaly
-                            </span>
-                            {% else %}
-                            <span class="badge bg-success-subtle text-success">
-                                <i class="fas fa-check-circle me-1"></i>Normal
-                            </span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            <div class="btn-group btn-group-sm" role="group">
-                                <button type="button" class="btn btn-outline-primary" title="View Details" onclick="viewDetails('{{ item.id }}')">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                                <button type="button" class="btn btn-outline-success" title="Download" onclick="downloadResult('{{ item.id }}')">
-                                    <i class="fas fa-download"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
         </div>
         
-        {% if history|length > 20 %}
-        <div class="card-footer bg-light text-center">
-            <a href="{{ url_for('main.history') }}" class="btn btn-primary">
-                <i class="fas fa-history me-2"></i>View All {{ history|length }} Records
-            </a>
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 pb-0">
+                    <h5 class="card-title mb-0">Distribution</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="pieChart" height="300"></canvas>
+                </div>
+            </div>
         </div>
-        {% endif %}
     </div>
-</div>
-{% endif %}
 
-<!-- Live Updates Indicator -->
-<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1000;">
-    <div class="toast" id="liveUpdateToast" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="toast-header">
-            <div class="rounded me-2 bg-success" style="width: 12px; height: 12px;"></div>
-            <strong class="me-auto">Live Updates</strong>
-            <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
-        </div>
-        <div class="toast-body">
-            Analytics data updated successfully!
+    <!-- Recent Activity -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">Recent Activity</h5>
+                        <a href="{{ url_for('main.history') }}" class="btn btn-sm btn-outline-primary">
+                            View All <i class="fas fa-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="border-0">Time</th>
+                                    <th class="border-0">Image</th>
+                                    <th class="border-0">Result</th>
+                                    <th class="border-0">Confidence</th>
+                                    <th class="border-0">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in history[:10] %}
+                                <tr>
+                                    <td class="align-middle">
+                                        <small class="text-muted">{{ item.timestamp }}</small>
+                                    </td>
+                                    <td class="align-middle">
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-sm bg-light rounded me-2">
+                                                <i class="fas fa-image text-muted"></i>
+                                            </div>
+                                            <span class="fw-medium">{{ item.image_name }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="align-middle">
+                                        <span class="badge bg-{{ 'danger' if item.prediction == 'pothole' else 'success' }} bg-opacity-10 text-{{ 'danger' if item.prediction == 'pothole' else 'success' }}">
+                                            {{ item.prediction|title }}
+                                        </span>
+                                    </td>
+                                    <td class="align-middle">
+                                        <div class="d-flex align-items-center">
+                                            <div class="progress me-2" style="width: 60px; height: 6px;">
+                                                <div class="progress-bar bg-{{ 'danger' if item.prediction == 'pothole' else 'success' }}" 
+                                                     style="width: {{ item.confidence * 100 }}%"></div>
+                                            </div>
+                                            <small class="text-muted">{{ "%.1f"|format(item.confidence * 100) }}%</small>
+                                        </div>
+                                    </td>
+                                    <td class="align-middle">
+                                        {% if item.is_anomaly %}
+                                        <span class="badge bg-warning bg-opacity-10 text-warning">
+                                            <i class="fas fa-exclamation-triangle me-1"></i>Needs Attention
+                                        </span>
+                                        {% else %}
+                                        <span class="badge bg-success bg-opacity-10 text-success">
+                                            <i class="fas fa-check me-1"></i>Good Condition
+                                        </span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
+
+    {% else %}
+    <!-- Empty State -->
+    <div class="row">
+        <div class="col-12">
+            <div class="text-center py-5">
+                <div class="mb-4">
+                    <i class="fas fa-chart-bar fa-4x text-muted"></i>
+                </div>
+                <h3 class="mb-3">No Analytics Data Available</h3>
+                <p class="text-muted mb-4">Start analyzing images to see detailed insights and performance metrics here.</p>
+                <a href="{{ url_for('main.detect') }}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-search me-2"></i>Start Detection
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}
 
+{% block extra_css %}
+<style>
+.icon-circle {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+.avatar-sm {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.card {
+    transition: transform 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+</style>
+{% endblock %}
+
 {% block extra_js %}
-{% if history %}
 <script>
 $(document).ready(function() {
-    initializeAnalyticsPage();
+    {% if history %}
     initializeCharts();
-    initializeTableFeatures();
-    
-    // Auto-refresh every 30 seconds
-    setInterval(updateAnalytics, 30000);
+    {% endif %}
 });
 
-// Initialize charts
 function initializeCharts() {
     // Trend Chart
     const trendCtx = document.getElementById('trendChart').getContext('2d');
-    window.trendChart = new Chart(trendCtx, {
+    new Chart(trendCtx, {
         type: 'line',
         data: {
-            labels: [
-                {% for item in history[-10:]|reverse %}
-                    '{{ item.timestamp.strftime("%m/%d") }}',
-                {% endfor %}
-            ],
+            labels: [{% for item in history[-7:] %}'{{ item.timestamp.split()[0] }}',{% endfor %}],
             datasets: [{
-                label: 'Normal',
-                data: [{% for item in history[-10:]|reverse %}{{ 1 if item.prediction == 'normal' else 0 }},{% endfor %}],
-                borderColor: 'rgba(40, 167, 69, 1)',
-                backgroundColor: 'rgba(40, 167, 69, 0.1)',
-                tension: 0.4,
-                fill: true
-            }, {
-                label: 'Anomalies',
-                data: [{% for item in history[-10:]|reverse %}{{ 1 if item.prediction == 'pothole' else 0 }},{% endfor %}],
-                borderColor: 'rgba(220, 53, 69, 1)',
-                backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                label: 'Detections',
+                data: [{% for item in history[-7:] %}1,{% endfor %}],
+                borderColor: '#0d6efd',
+                backgroundColor: 'rgba(13, 110, 253, 0.1)',
                 tension: 0.4,
                 fill: true
             }]
@@ -407,258 +255,46 @@ function initializeCharts() {
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            interaction: {
-                intersect: false,
-                mode: 'index'
-            },
             plugins: {
-                legend: {
-                    position: 'top'
-                },
-                tooltip: {
-                    backgroundColor: 'rgba(0,0,0,0.8)',
-                    titleColor: 'white',
-                    bodyColor: 'white'
-                }
+                legend: { display: false }
             },
             scales: {
-                y: {
-                    beginAtZero: true,
-                    grid: {
-                        color: 'rgba(0,0,0,0.1)'
-                    }
-                },
-                x: {
-                    grid: {
-                        display: false
-                    }
-                }
+                y: { beginAtZero: true }
             }
         }
     });
-    
-    // Distribution Chart
-    const distributionCtx = document.getElementById('distributionChart').getContext('2d');
-    window.distributionChart = new Chart(distributionCtx, {
+
+    // Pie Chart
+    const pieCtx = document.getElementById('pieChart').getContext('2d');
+    new Chart(pieCtx, {
         type: 'doughnut',
         data: {
-            labels: ['Normal Infrastructure', 'Anomalies Detected'],
+            labels: ['Normal', 'Anomalies'],
             datasets: [{
                 data: [
                     {{ history|selectattr('prediction', 'equalto', 'normal')|list|length }},
                     {{ history|selectattr('prediction', 'equalto', 'pothole')|list|length }}
                 ],
-                backgroundColor: [
-                    'rgba(40, 167, 69, 0.8)',
-                    'rgba(220, 53, 69, 0.8)'
-                ],
-                borderColor: [
-                    'rgba(40, 167, 69, 1)',
-                    'rgba(220, 53, 69, 1)'
-                ],
-                borderWidth: 2,
-                hoverOffset: 10
+                backgroundColor: ['#198754', '#dc3545'],
+                borderWidth: 0
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: {
-                        padding: 20,
-                        usePointStyle: true
-                    }
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                            const percentage = ((context.raw / total) * 100).toFixed(1);
-                            return context.label + ': ' + context.raw + ' (' + percentage + '%)';
-                        }
-                    }
-                }
-            },
-            cutout: '60%'
-        }
-    });
-    
-    // Confidence Histogram
-    const confidenceCtx = document.getElementById('confidenceHistogram').getContext('2d');
-    const confidenceData = [{% for item in history %}{{ item.confidence }},{% endfor %}];
-    const bins = createHistogramBins(confidenceData, 10);
-    
-    window.confidenceChart = new Chart(confidenceCtx, {
-        type: 'bar',
-        data: {
-            labels: bins.labels,
-            datasets: [{
-                label: 'Frequency',
-                data: bins.data,
-                backgroundColor: 'rgba(13, 110, 253, 0.6)',
-                borderColor: 'rgba(13, 110, 253, 1)',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: false
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        stepSize: 1
-                    }
-                },
-                x: {
-                    title: {
-                        display: true,
-                        text: 'Confidence Range'
-                    }
-                }
+                legend: { position: 'bottom' }
             }
         }
     });
 }
 
-// Create histogram bins
-function createHistogramBins(data, numBins) {
-    const min = Math.min(...data);
-    const max = Math.max(...data);
-    const binWidth = (max - min) / numBins;
-    
-    const bins = Array(numBins).fill(0);
-    const labels = [];
-    
-    for (let i = 0; i < numBins; i++) {
-        const start = min + i * binWidth;
-        const end = start + binWidth;
-        labels.push(`${(start * 100).toFixed(0)}-${(end * 100).toFixed(0)}%`);
-    }
-    
-    data.forEach(value => {
-        const binIndex = Math.min(Math.floor((value - min) / binWidth), numBins - 1);
-        bins[binIndex]++;
-    });
-    
-    return { labels, data: bins };
+function refreshData() {
+    location.reload();
 }
 
-// Initialize table features
-function initializeTableFeatures() {
-    // Search functionality
-    $('#searchTable').on('input', function() {
-        const searchTerm = $(this).val().toLowerCase();
-        $('#detectionTable tbody tr').each(function() {
-            const text = $(this).text().toLowerCase();
-            $(this).toggle(text.includes(searchTerm));
-        });
-    });
-    
-    // Filter functionality
-    $('#filterStatus').on('change', function() {
-        const filterValue = $(this).val();
-        $('#detectionTable tbody tr').each(function() {
-            if (filterValue === '') {
-                $(this).show();
-            } else {
-                const status = $(this).data('status');
-                $(this).toggle(status === filterValue);
-            }
-        });
-    });
-    
-    // Sortable columns
-    $('.sortable').click(function() {
-        const column = $(this).data('sort');
-        sortTable(column);
-    });
-}
-
-// Sort table function
-function sortTable(column) {
-    const table = $('#detectionTable');
-    const tbody = table.find('tbody');
-    const rows = tbody.find('tr').toArray();
-    
-    rows.sort(function(a, b) {
-        let aVal, bVal;
-        
-        switch(column) {
-            case 'timestamp':
-                aVal = $(a).find('td:eq(0)').text();
-                bVal = $(b).find('td:eq(0)').text();
-                return new Date(aVal) - new Date(bVal);
-            case 'confidence':
-                aVal = parseFloat($(a).find('td:eq(3) .small').text());
-                bVal = parseFloat($(b).find('td:eq(3) .small').text());
-                return bVal - aVal;
-            default:
-                aVal = $(a).find('td:eq(' + getColumnIndex(column) + ')').text();
-                bVal = $(b).find('td:eq(' + getColumnIndex(column) + ')').text();
-                return aVal.localeCompare(bVal);
-        }
-    });
-    
-    tbody.empty().append(rows);
-}
-
-function getColumnIndex(column) {
-    const columns = ['timestamp', 'image', 'prediction', 'confidence'];
-    return columns.indexOf(column);
-}
-
-// Action functions
-function viewDetails(id) {
-    // Implementation for viewing details
-    showNotification('Feature coming soon!', 'info');
-}
-
-function downloadResult(id) {
-    // Implementation for downloading result
-    showNotification('Download started', 'success');
-}
-
-// Dashboard controls
-$('#refreshData').click(function() {
-    $(this).find('i').addClass('fa-spin');
-    updateAnalytics();
-    setTimeout(() => {
-        $(this).find('i').removeClass('fa-spin');
-    }, 1000);
-});
-
-$('#shareReport').click(function() {
-    if (navigator.share) {
-        navigator.share({
-            title: 'Civic Sentinel Analytics Report',
-            text: 'Check out my infrastructure anomaly detection analytics',
-            url: window.location.href
-        });
-    } else {
-        // Fallback - copy to clipboard
-        navigator.clipboard.writeText(window.location.href);
-        showNotification('Report link copied to clipboard', 'success');
-    }
-});
-
-// Trend period filters
-$('input[name="trendPeriod"]').change(function() {
-    const period = $(this).attr('id');
-    updateTrendChart(period);
-});
-
-function updateTrendChart(period) {
-    // Implementation for updating trend chart based on period
-    showNotification(`Trend chart updated for ${period}`, 'info');
+function exportData() {
+    window.open('/api/analytics', '_blank');
 }
 </script>
-{% endif %}
 {% endblock %}

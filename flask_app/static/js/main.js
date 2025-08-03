@@ -19,7 +19,7 @@ $(document).ready(function() {
     
     // Initialize page-specific features
     if (window.location.pathname.includes('detect')) {
-        initializeDetectionPage();
+        setTimeout(initializeDetectionPage, 100);
     }
     
     if (window.location.pathname.includes('analytics')) {
@@ -259,6 +259,11 @@ function initializeDetectionPage() {
     const analyzeButton = $('#analyzeButton');
     const uploadForm = $('#uploadForm');
     
+    // Only initialize if elements exist
+    if (!uploadForm.length) return;
+    
+    console.log('Detection page initialized - form handling disabled for testing');
+    
     // Enhanced drag and drop
     uploadArea.on('dragenter dragover', function(e) {
         e.preventDefault();
@@ -302,22 +307,10 @@ function initializeDetectionPage() {
         resetUploadArea();
     });
     
-    // Form submission with progress
-    uploadForm.submit(function(e) {
-        e.preventDefault();
-        
-        if (isProcessing) return;
-        
-        const formData = new FormData(this);
-        const file = fileInput[0].files[0];
-        
-        if (!file) {
-            showNotification('Please select an image first', 'warning');
-            return;
-        }
-        
-        submitDetectionRequest(formData);
-    });
+    // JavaScript form handling disabled - let HTML form work normally
+    // uploadForm.submit(function(e) {
+    //     // Form validation and handling
+    // });
     
     // Paste image from clipboard
     $(document).on('paste', function(e) {
@@ -385,57 +378,7 @@ function enableAnalyzeButton() {
     }, 2000);
 }
 
-// Submit detection request
-function submitDetectionRequest(formData) {
-    isProcessing = true;
-    
-    // Update button state
-    const analyzeButton = $('#analyzeButton');
-    const originalText = analyzeButton.html();
-    analyzeButton.html('<span class="loading-spinner me-2"></span>Analyzing...').prop('disabled', true);
-    
-    // Show progress container
-    showProgressContainer();
-    
-    // Simulate progress updates
-    let progress = 0;
-    const progressInterval = setInterval(() => {
-        progress += Math.random() * 15;
-        if (progress > 90) progress = 90;
-        updateProgress(progress, getProgressMessage(progress));
-    }, 200);
-    
-    // Submit form
-    $.ajax({
-        url: '/detect',
-        type: 'POST',
-        data: formData,
-        processData: false,
-        contentType: false,
-        success: function(response) {
-            clearInterval(progressInterval);
-            updateProgress(100, 'Analysis complete!');
-            
-            setTimeout(() => {
-                if (response.redirect) {
-                    window.location.href = response.redirect;
-                } else {
-                    // Handle inline results
-                    displayResults(response);
-                }
-            }, 1000);
-        },
-        error: function(xhr, status, error) {
-            clearInterval(progressInterval);
-            hideProgressContainer();
-            showNotification('Analysis failed. Please try again.', 'danger');
-            
-            // Reset button
-            analyzeButton.html(originalText).prop('disabled', false);
-            isProcessing = false;
-        }
-    });
-}
+
 
 // Progress messages
 function getProgressMessage(progress) {
@@ -476,8 +419,8 @@ function initializeAnalyticsPage() {
         initializeCharts();
     }
     
-    // Real-time updates
-    setInterval(updateAnalytics, 30000); // Update every 30 seconds
+    // Real-time updates disabled to prevent 404 errors
+    // setInterval(updateAnalytics, 30000); // Update every 30 seconds
     
     // Export functionality
     $('#exportData').click(function() {
@@ -631,18 +574,18 @@ window.addEventListener('error', function(e) {
     showNotification('An unexpected error occurred', 'danger');
 });
 
-// Service Worker registration (for PWA features)
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function() {
-        navigator.serviceWorker.register('/sw.js')
-            .then(function(registration) {
-                console.log('ServiceWorker registration successful');
-            })
-            .catch(function(err) {
-                console.log('ServiceWorker registration failed');
-            });
-    });
-}
+// Service Worker registration disabled
+// if ('serviceWorker' in navigator) {
+//     window.addEventListener('load', function() {
+//         navigator.serviceWorker.register('/static/sw.js')
+//             .then(function(registration) {
+//                 console.log('ServiceWorker registration successful');
+//             })
+//             .catch(function(err) {
+//                 console.log('ServiceWorker registration failed');
+//             });
+//     });
+// }
 
 // Add notification container to body
 $(document).ready(function() {

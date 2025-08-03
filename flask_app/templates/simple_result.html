@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-10 mx-auto">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-search me-2"></i>Detection Result</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="text-center">
+                                <img src="{{ image_path }}" class="img-fluid rounded shadow" alt="Analyzed Image" style="max-height: 400px;">
+                                <p class="mt-2 text-muted"><strong>{{ filename }}</strong></p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="result-info">
+                                <h3 class="mb-3">Analysis Results</h3>
+                                
+                                <div class="mb-4">
+                                    <h4 class="text-{{ 'danger' if result.is_anomaly else 'success' }}">
+                                        <i class="fas fa-{{ 'exclamation-triangle' if result.is_anomaly else 'check-circle' }} me-2"></i>
+                                        {{ result.prediction|title }}
+                                    </h4>
+                                    <p class="lead">Confidence: <strong>{{ "%.1f"|format(result.confidence * 100) }}%</strong></p>
+                                </div>
+                                
+                                {% if result.is_anomaly %}
+                                <div class="alert alert-danger">
+                                    <h5><i class="fas fa-exclamation-triangle me-2"></i>Infrastructure Anomaly Detected</h5>
+                                    <p class="mb-0">This image shows signs of infrastructure damage that may require attention.</p>
+                                </div>
+                                {% else %}
+                                <div class="alert alert-success">
+                                    <h5><i class="fas fa-check-circle me-2"></i>Normal Infrastructure</h5>
+                                    <p class="mb-0">No anomalies detected. Infrastructure appears to be in good condition.</p>
+                                </div>
+                                {% endif %}
+                                
+                                <div class="mt-4">
+                                    <h6>Probability Breakdown:</h6>
+                                    <div class="mb-2">
+                                        <div class="d-flex justify-content-between">
+                                            <span>Normal:</span>
+                                            <span><strong>{{ "%.1f"|format(result.probabilities.plain * 100) }}%</strong></span>
+                                        </div>
+                                        <div class="progress mb-2" style="height: 8px;">
+                                            <div class="progress-bar bg-success" style="width: {{ result.probabilities.plain * 100 }}%"></div>
+                                        </div>
+                                    </div>
+                                    <div class="mb-2">
+                                        <div class="d-flex justify-content-between">
+                                            <span>Anomaly:</span>
+                                            <span><strong>{{ "%.1f"|format(result.probabilities.pothole * 100) }}%</strong></span>
+                                        </div>
+                                        <div class="progress" style="height: 8px;">
+                                            <div class="progress-bar bg-danger" style="width: {{ result.probabilities.pothole * 100 }}%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <hr class="my-4">
+                    
+                    <div class="row text-center">
+                        <div class="col-md-3">
+                            <div class="stat-item">
+                                <h6 class="text-muted">Processing Time</h6>
+                                <p class="h5">{{ "%.2f"|format(result.processing_time) }}s</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-item">
+                                <h6 class="text-muted">File Size</h6>
+                                <p class="h5">{{ (result.file_size / 1024)|round(1) }} KB</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-item">
+                                <h6 class="text-muted">Features Analyzed</h6>
+                                <p class="h5">{{ result.features_analyzed }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-item">
+                                <h6 class="text-muted">Model Version</h6>
+                                <p class="h5">{{ result.model_version }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center mt-4">
+                        <a href="{{ url_for('main.detect') }}" class="btn btn-primary btn-lg me-3">
+                            <i class="fas fa-search me-2"></i>Analyze Another Image
+                        </a>
+                        <a href="{{ url_for('main.analytics') }}" class="btn btn-outline-secondary btn-lg">
+                            <i class="fas fa-chart-bar me-2"></i>View Analytics
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.stat-item {
+    padding: 1rem;
+    border-radius: 8px;
+    background: #f8f9fa;
+    margin-bottom: 1rem;
+}
+
+.result-info h3 {
+    color: #2c3e50;
+}
+
+.progress {
+    border-radius: 10px;
+}
+
+.card {
+    border: none;
+}
+</style>
+{% endblock %}

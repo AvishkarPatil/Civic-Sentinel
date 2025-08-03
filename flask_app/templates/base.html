@@ -37,10 +37,13 @@
 </head>
 <body>
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #2c3e50; padding: 15px 0;">
+    <nav class="navbar navbar-expand-lg fixed-top modern-navbar">
         <div class="container">
-            <a class="navbar-brand" href="{{ url_for('main.index') }}">
-                <i class="fas fa-road me-2"></i>Civic Sentinel
+            <a class="navbar-brand modern-brand" href="{{ url_for('main.index') }}">
+                <div class="brand-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <span class="brand-text">Civic Sentinel</span>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -125,7 +128,7 @@
     </div>
 
     <!-- Main Content -->
-    <main class="container my-4">
+    <main class="container my-4" style="margin-top: 2rem !important;">
         {% block content %}{% endblock %}
     </main>
 

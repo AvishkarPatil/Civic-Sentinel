@@ -21,11 +21,49 @@
 
 /* Dark mode variables */
 [data-theme="dark"] {
-    --light-color: #1a1a1a;
+    --light-color: #121212;
     --dark-color: #ffffff;
-    --shadow-light: 0 2px 15px rgba(255, 255, 255, 0.1);
-    --shadow-medium: 0 5px 25px rgba(255, 255, 255, 0.15);
-    --shadow-heavy: 0 10px 40px rgba(255, 255, 255, 0.2);
+    --secondary-color: #b0b0b0;
+    --shadow-light: 0 2px 15px rgba(0, 0, 0, 0.3);
+    --shadow-medium: 0 5px 25px rgba(0, 0, 0, 0.4);
+    --shadow-heavy: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="dark"] body {
+    background: #121212;
+    color: #ffffff;
+}
+
+[data-theme="dark"] .text-muted {
+    color: #b0b0b0 !important;
+}
+
+[data-theme="dark"] .bg-light {
+    background: #2d2d2d !important;
+    color: #ffffff !important;
+}
+
+[data-theme="dark"] .navbar {
+    background: #1e1e1e !important;
+}
+
+[data-theme="dark"] .card {
+    background: #1e1e1e !important;
+    color: #ffffff !important;
+    border: 1px solid #333 !important;
+}
+
+[data-theme="dark"] .form-control {
+    background: #2d2d2d !important;
+    color: #ffffff !important;
+    border: 1px solid #444 !important;
+}
+
+[data-theme="dark"] .form-control:focus {
+    background: #2d2d2d !important;
+    color: #ffffff !important;
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25) !important;
 }
 
 /* General styles */
@@ -60,61 +98,125 @@ html {
     background: #0b5ed7;
 }
 
-/* Navbar enhancements */
-.navbar {
-    backdrop-filter: blur(10px);
-    box-shadow: var(--shadow-light);
+/* Modern Navbar */
+.modern-navbar {
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    padding: 1rem 0;
+}
+
+[data-theme="dark"] .modern-navbar {
+    background: rgba(30, 30, 30, 0.95) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.modern-brand {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: #2c3e50 !important;
+    font-weight: 700;
+    font-size: 1.5rem;
     transition: var(--transition);
 }
 
-.navbar-brand {
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    font-size: 1.5rem;
+[data-theme="dark"] .modern-brand {
+    color: #ffffff !important;
 }
 
-.navbar-brand:hover {
-    transform: scale(1.05);
+.brand-icon {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    margin-right: 12px;
+    font-size: 1.2rem;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.brand-text {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+[data-theme="dark"] .brand-text {
+    background: linear-gradient(135deg, #8fa4f3 0%, #9575cd 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.modern-brand:hover {
+    transform: translateY(-2px);
+}
+
+.modern-brand:hover .brand-icon {
+    transform: rotate(5deg) scale(1.1);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
 }
 
 .nav-link {
     font-weight: 500;
     position: relative;
     transition: var(--transition);
+    color: #2c3e50 !important;
+    padding: 0.75rem 1.25rem !important;
+    border-radius: 25px;
+    margin: 0 0.25rem;
 }
 
-.nav-link::after {
-    content: '';
-    position: absolute;
-    width: 0;
-    height: 2px;
-    bottom: 0;
-    left: 50%;
-    background: var(--primary-color);
-    transition: var(--transition);
+[data-theme="dark"] .nav-link {
+    color: #ffffff !important;
 }
 
-.nav-link:hover::after,
-.nav-link.active::after {
-    width: 100%;
-    left: 0;
+.nav-link:hover {
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea !important;
+    transform: translateY(-1px);
 }
 
-/* Dark mode toggle */
-.theme-toggle {
-    background: none;
-    border: 2px solid var(--primary-color);
-    color: var(--primary-color);
-    border-radius: 50px;
-    padding: 0.5rem 1rem;
-    transition: var(--transition);
+.nav-link.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white !important;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.nav-link i {
+    margin-right: 0.5rem;
     font-size: 0.9rem;
 }
 
+.theme-toggle {
+    background: rgba(102, 126, 234, 0.1);
+    border: 2px solid rgba(102, 126, 234, 0.3);
+    color: #667eea;
+    border-radius: 25px;
+    padding: 0.5rem 1rem;
+    transition: var(--transition);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
 .theme-toggle:hover {
-    background: var(--primary-color);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
-    transform: scale(1.05);
+    border-color: transparent;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+/* Add top padding to body for fixed navbar */
+body {
+    padding-top: 80px;
 }
 
 /* Enhanced cards */
@@ -127,14 +229,11 @@ html {
     background: white;
 }
 
-[data-theme="dark"] .card {
-    background: #2d3748;
-    color: white;
-}
+
 
 .card:hover {
-    transform: translateY(-8px) scale(1.02);
-    box-shadow: var(--shadow-heavy);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-medium);
 }
 
 .card-header {
@@ -188,8 +287,8 @@ html {
 }
 
 .btn-primary:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(13, 110, 253, 0.4);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(13, 110, 253, 0.3);
 }
 
 .btn-success {
@@ -199,8 +298,8 @@ html {
 }
 
 .btn-success:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(25, 135, 84, 0.4);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(25, 135, 84, 0.3);
 }
 
 .btn-danger {
@@ -210,8 +309,8 @@ html {
 }
 
 .btn-danger:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(220, 53, 69, 0.4);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
 }
 
 /* Floating action button */
@@ -267,7 +366,7 @@ html {
 .upload-area:hover {
     border-color: var(--primary-color);
     background: linear-gradient(135deg, #f1f8ff 0%, #e3f2fd 100%);
-    transform: scale(1.02);
+    transform: scale(1.005);
 }
 
 .upload-area.dragover {
